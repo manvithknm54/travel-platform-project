@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  trips Trip[]
+}
+
+model Trip {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  stops  Stop[]
+  shares Share[]
+}
+
+model City {
+  id        String @id @default(uuid())
+  name      String
+  country   String
+  costIndex Int
+
+  stops Stop[]
+}
+
+model Stop {
+  id        String   @id @default(uuid())
+  order     Int
+  startDate DateTime
+  endDate   DateTime
+
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id])
+
+  activities StopActivity[]
+}
+
+model Activity {
+  id       String @id @default(uuid())
+  title    String
+  category String
+  cost     Int
+  duration Int // in hours
+
+  stops StopActivity[]
+}
+
+model StopActivity {
+  id        String @id @default(uuid())
+  dayNumber Int
+
+  stopId String
+  stop   Stop   @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id])
+}
+
+model Share {
+  id    String @id @default(uuid())
+  token String @unique
+
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
