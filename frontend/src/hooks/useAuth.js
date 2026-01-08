@@ -1,47 +1,47 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser, signupUser } from "../modules/auth/auth.api";
-import { setToken, removeToken } from "../services/token.service";
+import apiClient from "../services/apiClient";
 
 export function useAuth() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const login = async (credentials) => {
+  const login = async (data) => {
     try {
       setLoading(true);
       setError(null);
 
-      const data = await loginUser(credentials);
-      setToken(data.token);
-
+      const res = await apiClient.post("/auth/login", data);
+      localStorage.setItem("globetrooter_token", res.data.token);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError("Invalid email or password");
     } finally {
       setLoading(false);
     }
   };
 
-  const signup = async (details) => {
+  const signup = async (data) => {
     try {
       setLoading(true);
       setError(null);
 
-      const data = await signupUser(details);
-      setToken(data.token);
-
-      navigate("/");
+      const res = await apiClient.post("/auth/register", data);
+      localStorage.setItem("globetrooter_token", res.data.token);
+      navigate("/"); // ✅ DIRECT TO DASHBOARD
     } catch (err) {
-      setError(err.response?.data?.message || "Signup failed");
+      setError(
+        err?.response?.data?.message ||
+          "Signup failed. Try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const logout = () => {
-    removeToken();
+    localStorage.removeItem("globetrooter_token");
     navigate("/login");
   };
 

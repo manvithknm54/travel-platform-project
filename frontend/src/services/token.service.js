@@ -1,4 +1,4 @@
-const TOKEN_KEY = "globetrotter_token";
+const TOKEN_KEY = "globetrooter_token";
 
 export const setToken = (token) => {
   localStorage.setItem(TOKEN_KEY, token);

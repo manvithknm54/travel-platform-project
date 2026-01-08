@@ -7,117 +7,102 @@ function ActivitySearch({ tripId }) {
   const [stops, setStops] = useState([]);
   const [selectedStop, setSelectedStop] = useState("");
   const [dayNumber, setDayNumber] = useState(1);
-  const [adding, setAdding] = useState(false);
-  const [loadingStops, setLoadingStops] = useState(true);
-  const [loadingActivities, setLoadingActivities] = useState(false);
+  const [maxDays, setMaxDays] = useState(1);
+  const [message, setMessage] = useState("");
 
-  /* -----------------------------------
-     Load stops (cities) for this trip
-  ----------------------------------- */
+  // Load trip + stops
   useEffect(() => {
-    setLoadingStops(true);
-    apiClient
-      .get(`/itinerary/trip/${tripId}`)
-      .then((res) => setStops(res.data))
-      .catch((err) => {
-        console.error(err);
-        alert("Failed to load cities for this trip");
-      })
-      .finally(() => setLoadingStops(false));
+    loadTripData();
   }, [tripId]);
 
-  /* -----------------------------------
-     Search activities
-  ----------------------------------- */
+  const loadTripData = async () => {
+    const tripRes = await apiClient.get(`/trips/${tripId}`);
+    const itineraryRes = await apiClient.get(`/itinerary/trip/${tripId}`);
+
+    const start = new Date(tripRes.data.startDate);
+    const end = new Date(tripRes.data.endDate);
+
+    const totalDays =
+      Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+    setMaxDays(totalDays);
+    setStops(itineraryRes.data);
+  };
+
+  // Search activities
   useEffect(() => {
     if (!query) {
       setActivities([]);
       return;
     }
 
-    setLoadingActivities(true);
     apiClient
       .get("/activities", { params: { q: query } })
-      .then((res) => setActivities(res.data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoadingActivities(false));
+      .then((res) => setActivities(res.data));
   }, [query]);
 
-  /* -----------------------------------
-     Add activity to selected stop
-  ----------------------------------- */
-  const addActivity = async (activityId) => {
+  const addActivity = async (activity) => {
     if (!selectedStop) {
-      alert("Please select a city first");
+      setMessage("Please select a city first");
       return;
     }
 
-    try {
-      setAdding(true);
+    await apiClient.post(
+      `/itinerary/stops/${selectedStop}/activities`,
+      {
+        activityId: activity.id,
+        dayNumber,
+      }
+    );
 
-      await apiClient.post(
-        `/itinerary/stops/${selectedStop}/activities`,
-        {
-          activityId,
-          dayNumber: Number(dayNumber),
-        }
-      );
-
-      alert("Activity added successfully ✅");
-
-      // 🔑 RESET STATE (THIS FIXES THE BUG)
-      setQuery("");
-      setActivities([]);
-      setDayNumber(1);
-
-    } catch (error) {
-      console.error(error);
-      alert("Failed to add activity ❌");
-    } finally {
-      setAdding(false);
-    }
+    setMessage(
+      `"${activity.title}" has been added to your trip (Day ${dayNumber})`
+    );
+    setQuery("");
   };
 
-  /* -----------------------------------
-     UI
-  ----------------------------------- */
   return (
     <div>
       <h3>Add Activities</h3>
 
-      {/* Select City */}
-      <div style={{ marginBottom: "10px" }}>
-        <label>
-          Select City:&nbsp;
-          <select
-            value={selectedStop}
-            onChange={(e) => setSelectedStop(e.target.value)}
-            disabled={loadingStops}
-          >
-            <option value="">-- Select --</option>
-            {stops.map((stop) => (
-              <option key={stop.id} value={stop.id}>
-                {stop.city.name}
+      {message && <p style={styles.message}>{message}</p>}
+
+      {/* City Selection */}
+      <label>
+        City:
+        <select
+          value={selectedStop}
+          onChange={(e) => setSelectedStop(e.target.value)}
+        >
+          <option value="">-- Select City --</option>
+          {stops.map((stop) => (
+            <option key={stop.id} value={stop.id}>
+              {stop.city.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {/* Day Selection */}
+      <label style={{ marginLeft: "10px" }}>
+        Day:
+        <select
+          value={dayNumber}
+          onChange={(e) => setDayNumber(Number(e.target.value))}
+        >
+          {Array.from({ length: maxDays }, (_, i) => i + 1).map(
+            (day) => (
+              <option key={day} value={day}>
+                {day}
               </option>
-            ))}
-          </select>
-        </label>
+            )
+          )}
+        </select>
+      </label>
 
-        &nbsp;&nbsp;
+      <br /><br />
 
-        <label>
-          Day:&nbsp;
-          <input
-            type="number"
-            min="1"
-            value={dayNumber}
-            onChange={(e) => setDayNumber(e.target.value)}
-            style={{ width: "60px" }}
-          />
-        </label>
-      </div>
-
-      {/* Search Activities */}
+      {/* Search */}
       <input
         type="text"
         placeholder="Search activities..."
@@ -125,24 +110,14 @@ function ActivitySearch({ tripId }) {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {loadingActivities && <p>Searching activities...</p>}
-
-      <ul style={{ marginTop: "10px" }}>
+      <ul>
         {activities.map((activity) => (
-          <li key={activity.id} style={styles.activity}>
+          <li key={activity.id} style={styles.item}>
             <div>
-              <strong>{activity.title}</strong>
-              <br />
-              <small>
-                {activity.category} | ₹{activity.cost} | {activity.duration}h
-              </small>
+              <strong>{activity.title}</strong> | ₹{activity.cost}
             </div>
-
-            <button
-              onClick={() => addActivity(activity.id)}
-              disabled={adding}
-            >
-              {adding ? "Adding..." : "Add"}
+            <button onClick={() => addActivity(activity)}>
+              Add
             </button>
           </li>
         ))}
@@ -152,12 +127,16 @@ function ActivitySearch({ tripId }) {
 }
 
 const styles = {
-  activity: {
+  item: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    padding: "8px",
+    marginBottom: "8px",
     borderBottom: "1px solid #ddd",
+    padding: "6px",
+  },
+  message: {
+    color: "green",
+    marginBottom: "10px",
   },
 };
 

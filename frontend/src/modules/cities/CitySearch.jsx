@@ -1,54 +1,85 @@
-import { useState } from "react";
-import { searchCities } from "./cities.api";
+import { useEffect, useState } from "react";
+import apiClient from "../../services/apiClient";
 
-function CitySearch({ onSelect }) {
+function CitySearch({ tripId }) {
   const [query, setQuery] = useState("");
   const [cities, setCities] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [existingStops, setExistingStops] = useState([]);
 
-  const handleSearch = async (e) => {
-    const value = e.target.value;
-    setQuery(value);
+  // Load existing stops to calculate order
+  useEffect(() => {
+    apiClient
+      .get(`/itinerary/trip/${tripId}`)
+      .then((res) => setExistingStops(res.data))
+      .catch(() => setExistingStops([]));
+  }, [tripId]);
 
-    if (value.length < 2) {
+  // Search cities
+  useEffect(() => {
+    if (!query) {
       setCities([]);
       return;
     }
 
-    setLoading(true);
+    apiClient
+      .get("/cities", { params: { q: query } })
+      .then((res) => setCities(res.data))
+      .catch(() => setCities([]));
+  }, [query]);
+
+  const addCityToTrip = async (city) => {
+    setMessage("");
+    setError("");
+
     try {
-      const data = await searchCities(value);
-      setCities(data);
+      const order = existingStops.length + 1;
+
+      await apiClient.post(`/itinerary/trip/${tripId}/stops`, {
+        cityId: city.id,
+        startDate: new Date().toISOString(),
+        endDate: new Date().toISOString(),
+        order,
+      });
+
+      setMessage(`"${city.name}" has been added to your trip`);
+      setQuery("");
+
+      // refresh stops after add
+      const updated = await apiClient.get(
+        `/itinerary/trip/${tripId}`
+      );
+      setExistingStops(updated.data);
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
+      setError("Failed to add city. Please try again.");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h3>Add City to Trip</h3>
+    <div>
+      <h3>Add Cities</h3>
+
+      {message && <p style={styles.success}>{message}</p>}
+      {error && <p style={styles.error}>{error}</p>}
 
       <input
-        placeholder="Type city name..."
+        type="text"
+        placeholder="Search city..."
         value={query}
-        onChange={handleSearch}
+        onChange={(e) => setQuery(e.target.value)}
       />
 
-      {loading && <p>Searching...</p>}
-
-      <ul style={styles.list}>
+      <ul>
         {cities.map((city) => (
-          <li
-            key={city.id}
-            style={styles.item}
-            onClick={() => onSelect(city)}
-          >
-            <strong>{city.name}</strong>, {city.country}
-            <span style={styles.meta}>
-              Cost Index: {city.costIndex}
-            </span>
+          <li key={city.id} style={styles.item}>
+            <div>
+              <strong>{city.name}</strong> ({city.country})
+            </div>
+            <button onClick={() => addCityToTrip(city)}>
+              Add
+            </button>
           </li>
         ))}
       </ul>
@@ -57,24 +88,20 @@ function CitySearch({ onSelect }) {
 }
 
 const styles = {
-  container: {
-    border: "1px solid #ccc",
-    padding: "12px",
-    borderRadius: "6px",
-  },
-  list: {
-    listStyle: "none",
-    padding: 0,
-  },
   item: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "8px",
+    borderBottom: "1px solid #ddd",
     padding: "6px",
-    cursor: "pointer",
-    borderBottom: "1px solid #eee",
   },
-  meta: {
-    display: "block",
-    fontSize: "12px",
-    color: "#666",
+  success: {
+    color: "green",
+    marginBottom: "10px",
+  },
+  error: {
+    color: "red",
+    marginBottom: "10px",
   },
 };
 
