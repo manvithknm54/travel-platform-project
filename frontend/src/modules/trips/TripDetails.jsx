@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import apiClient from "../../services/apiClient";
+
 import CitySearch from "../cities/CitySearch";
 import ActivitySearch from "../activities/ActivitySearch";
 import ItineraryView from "../itinerary/ItineraryView";
@@ -16,25 +17,8 @@ function TripDetails() {
     apiClient
       .get(`/trips/${tripId}`)
       .then((res) => setTrip(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error("Failed to load trip", err));
   }, [tripId]);
-
-  // 👇 THIS IS THE IMPORTANT CONNECTION
-  const handleCitySelect = async (city) => {
-    try {
-      await apiClient.post(`/itinerary/trip/${tripId}/stops`, {
-        cityId: city.id,
-        startDate: trip.startDate,
-        endDate: trip.startDate,
-        order: 1,
-      });
-
-      alert(`${city.name} added to trip`);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to add city");
-    }
-  };
 
   if (!trip) return <p>Loading trip...</p>;
 
@@ -46,6 +30,7 @@ function TripDetails() {
         {new Date(trip.endDate).toDateString()}
       </p>
 
+      {/* Tabs */}
       <div style={styles.tabs}>
         <button onClick={() => setActiveTab("itinerary")}>
           Itinerary
@@ -64,19 +49,19 @@ function TripDetails() {
         </button>
       </div>
 
+      {/* Content */}
       <div style={styles.content}>
         {activeTab === "itinerary" && (
           <ItineraryView tripId={tripId} />
         )}
 
         {activeTab === "cities" && (
-          <CitySearch onSelect={handleCitySelect} />
+          <CitySearch tripId={tripId} />
         )}
 
         {activeTab === "activities" && (
           <ActivitySearch tripId={tripId} />
         )}
-
 
         {activeTab === "budget" && (
           <BudgetView tripId={tripId} />

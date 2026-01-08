@@ -1,75 +1,96 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createTrip } from "./trips.api";
+import apiClient from "../../services/apiClient";
 
-const CreateTrip = () => {
-  const navigate = useNavigate(); // ✅ ADD THIS
+function CreateTrip() {
+  const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    name: "",
-    startDate: "",
-    endDate: "",
-    description: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!title || !startDate || !endDate) {
+      alert("Please fill required fields");
+      return;
+    }
+
+    setLoading(true);
     try {
-      await createTrip(form);          // ✅ backend call
-      navigate("/my-trips");           // ✅ THIS IS THE KEY LINE
+      await apiClient.post("/trips", {
+        title,
+        description,
+        startDate,
+        endDate,
+      });
+
+      navigate("/"); // back to dashboard
     } catch (err) {
-      console.error(
-        "Create trip failed:",
-        err.response?.data || err.message
-      );
+      alert("Failed to create trip");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="name"
-        placeholder="Trip name"
-        value={form.name}
-        onChange={handleChange}
-        required
-      />
+    <div style={styles.container}>
+      <h2>Create New Trip</h2>
 
-      <input
-        type="date"
-        name="startDate"
-        value={form.startDate}
-        onChange={handleChange}
-        required
-      />
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <input
+          type="text"
+          placeholder="Trip Title *"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-      <input
-        type="date"
-        name="endDate"
-        value={form.endDate}
-        onChange={handleChange}
-        required
-      />
+        <textarea
+          placeholder="Description (optional)"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
-      <textarea
-        name="description"
-        placeholder="Description"
-        value={form.description}
-        onChange={handleChange}
-      />
+        <label>
+          Start Date *
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </label>
 
-      <button type="submit">Create Trip</button>
-    </form>
+        <label>
+          End Date *
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </label>
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Creating..." : "Create Trip"}
+        </button>
+      </form>
+    </div>
   );
+}
+
+const styles = {
+  container: {
+    padding: "30px",
+    maxWidth: "500px",
+    margin: "0 auto",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
 };
 
 export default CreateTrip;
