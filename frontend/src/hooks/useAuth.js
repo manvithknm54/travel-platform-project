@@ -27,13 +27,15 @@ export function useAuth() {
       setLoading(true);
       setError(null);
 
-      const res = await apiClient.post("/auth/register", data);
+      // ✅ FIXED ENDPOINT
+      const res = await apiClient.post("/auth/signup", data);
+
       localStorage.setItem("globetrooter_token", res.data.token);
-      navigate("/"); // ✅ DIRECT TO DASHBOARD
+      navigate("/");
     } catch (err) {
       setError(
         err?.response?.data?.message ||
-          "Signup failed. Try again."
+        "Signup failed. Try again."
       );
     } finally {
       setLoading(false);

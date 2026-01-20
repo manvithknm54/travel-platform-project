@@ -11,6 +11,7 @@ function Signup() {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,65 +19,101 @@ function Signup() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    signup(form); // ✅ OLD FLOW → DIRECT DASHBOARD
+    signup(form);
   };
 
   return (
     <div style={styles.page}>
-      <form onSubmit={handleSubmit} style={styles.card}>
-        <h2 style={{ textAlign: "center" }}>Create Account</h2>
+      <form 
+        onSubmit={handleSubmit} 
+        style={{
+          ...styles.card,
+          transform: isHovered ? "translateY(-5px)" : "translateY(0px)",
+          boxShadow: isHovered 
+            ? "0 25px 50px -12px rgba(0, 0, 0, 0.7)" 
+            : "0 20px 40px rgba(0,0,0,0.6)"
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div style={styles.headerGroup}>
+          <h2 style={styles.title}>Create Account</h2>
+          <p style={styles.subtitle}>Join our community and start your journey</p>
+        </div>
 
-        {error && <p style={styles.error}>{error}</p>}
+        {error && <div style={styles.errorBox}>{error}</div>}
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-
-        {/* Password field with eye INSIDE */}
-        <div style={styles.passwordWrapper}>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Full Name</label>
           <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder="Password"
-            value={form.password}
+            style={styles.input}
+            type="text"
+            name="name"
+            placeholder="John Doe"
+            value={form.name}
             onChange={handleChange}
             required
           />
-          <span
-            style={styles.eyeSignup}
-            onClick={() => setShowPassword(!showPassword)}
-            title="Show / hide password"
-          >
-            👁
-          </span>
         </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating account..." : "Sign Up"}
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Email Address</label>
+          <input
+            style={styles.input}
+            type="email"
+            name="email"
+            placeholder="name@example.com"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Password</label>
+          <div style={styles.passwordWrapper}>
+            <input
+              style={styles.input}
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="••••••••"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+            <span
+              style={styles.eye}
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🔒" : "👁️"}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          style={{
+            ...styles.button,
+            filter: loading ? "grayscale(0.5)" : "none",
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+          disabled={loading}
+        >
+          {loading ? "Creating account..." : "Get Started"}
         </button>
 
         <p style={styles.footer}>
           Already have an account?{" "}
-          <Link to="/login">Login</Link>
+          <Link to="/login" style={styles.link}>
+            Log in here
+          </Link>
         </p>
       </form>
     </div>
   );
 }
+
+/* ================= PREMIUM DARK THEME STYLES ================= */
 
 const styles = {
   page: {
@@ -84,36 +121,121 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    background: "linear-gradient(135deg, #0f172a 0%, #020617 100%)",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    padding: "20px",
   },
+
   card: {
-    width: "360px",
-    padding: "24px",
+    width: "100%",
+    maxWidth: "420px",
+    padding: "40px",
     display: "flex",
     flexDirection: "column",
-    gap: "14px",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
+    gap: "20px",
+    borderRadius: "24px",
+    background: "rgba(30, 41, 59, 0.5)", 
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    backdropFilter: "blur(16px)",
+    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
   },
+
+  headerGroup: {
+    textAlign: "center",
+    marginBottom: "4px",
+  },
+
+  title: {
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "#ffffff",
+    letterSpacing: "-0.5px",
+    margin: "0 0 8px 0",
+  },
+
+  subtitle: {
+    fontSize: "14px",
+    color: "#94a3b8",
+    lineHeight: "1.5",
+  },
+
+  inputGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+
+  label: {
+    fontSize: "13px",
+    fontWeight: "500",
+    color: "#cbd5e1",
+    marginLeft: "4px",
+  },
+
+  input: {
+    width: "100%",
+    padding: "14px 16px",
+    borderRadius: "12px",
+    background: "rgba(15, 23, 42, 0.8)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    color: "#f8fafc",
+    outline: "none",
+    fontSize: "15px",
+    transition: "all 0.2s ease",
+    boxSizing: "border-box",
+  },
+
   passwordWrapper: {
     position: "relative",
+    width: "100%",
   },
-  eyeSignup: {
+
+  eye: {
     position: "absolute",
-    right: "10px",
+    right: "16px",
     top: "50%",
     transform: "translateY(-50%)",
     cursor: "pointer",
-    userSelect: "none",
-    color: "#28a745", // 🟢 signup color
+    fontSize: "18px",
+    opacity: 0.5,
+    transition: "opacity 0.2s",
   },
-  error: {
-    color: "red",
-    fontSize: "14px",
+
+  button: {
+    marginTop: "10px",
+    padding: "14px",
+    borderRadius: "12px",
+    border: "none",
+    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", // Green for signup
+    color: "#ffffff",
+    fontSize: "16px",
+    fontWeight: "600",
+    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)",
+    transition: "all 0.3s ease",
+  },
+
+  errorBox: {
+    background: "rgba(239, 68, 68, 0.1)",
+    border: "1px solid rgba(239, 68, 68, 0.2)",
+    color: "#fca5a5",
+    padding: "12px",
+    borderRadius: "10px",
+    fontSize: "13px",
     textAlign: "center",
   },
+
   footer: {
     textAlign: "center",
     fontSize: "14px",
+    color: "#94a3b8",
+    marginTop: "4px",
+  },
+
+  link: {
+    color: "#10b981",
+    textDecoration: "none",
+    fontWeight: "600",
+    transition: "color 0.2s",
   },
 };
 
