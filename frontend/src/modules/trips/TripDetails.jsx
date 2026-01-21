@@ -10,8 +10,12 @@ import ShareTrip from "../sharing/ShareTrip";
 
 function TripDetails() {
   const { tripId } = useParams();
+
   const [trip, setTrip] = useState(null);
   const [activeTab, setActiveTab] = useState("itinerary");
+
+  // ✅ REQUIRED STATE (THIS FIXES BLANK SCREEN)
+  const [selectedCity, setSelectedCity] = useState(null);
 
   useEffect(() => {
     apiClient
@@ -32,14 +36,15 @@ function TripDetails() {
   return (
     <div style={styles.page}>
       <div style={styles.maxContainer}>
-        {/* Header Section */}
+        {/* HEADER */}
         <header style={styles.header}>
           <div style={styles.headerContent}>
             <div style={styles.badge}>Trip Overview</div>
             <h2 style={styles.title}>{trip.title}</h2>
             <div style={styles.metaRow}>
               <span style={styles.dateBadge}>
-                📅 {new Date(trip.startDate).toLocaleDateString()} — {new Date(trip.endDate).toLocaleDateString()}
+                📅 {new Date(trip.startDate).toLocaleDateString()} —{" "}
+                {new Date(trip.endDate).toLocaleDateString()}
               </span>
               <span style={styles.separator}>•</span>
               <span style={styles.statusText}>Plan in progress</span>
@@ -47,7 +52,7 @@ function TripDetails() {
           </div>
         </header>
 
-        {/* Tab Navigation */}
+        {/* TABS */}
         <nav style={styles.tabsContainer}>
           <div style={styles.tabs}>
             {TAB_CONFIG.map((tab) => {
@@ -61,21 +66,33 @@ function TripDetails() {
                     ...(isActive ? styles.activeTab : {}),
                   }}
                 >
-                  <span style={{ fontSize: "16px" }}>{tab.icon}</span>
-                  {tab.label}
-                  {isActive && <div style={styles.activeIndicator} />}
+                  {tab.icon} {tab.label}
                 </button>
               );
             })}
           </div>
         </nav>
 
-        {/* Main Content Pane */}
+        {/* CONTENT */}
         <main style={styles.contentPane}>
           <div style={styles.innerContent}>
             {activeTab === "itinerary" && <ItineraryView tripId={tripId} />}
-            {activeTab === "cities" && <CitySearch tripId={tripId} />}
-            {activeTab === "activities" && <ActivitySearch tripId={tripId} />}
+
+            {activeTab === "cities" && (
+              <CitySearch
+                tripId={tripId}
+                selectedCity={selectedCity}
+                onCitySelect={setSelectedCity}
+              />
+            )}
+
+            {activeTab === "activities" && (
+              <ActivitySearch
+                tripId={tripId}
+                selectedCity={selectedCity}
+              />
+            )}
+
             {activeTab === "budget" && <BudgetView tripId={tripId} />}
             {activeTab === "share" && <ShareTrip tripId={tripId} />}
           </div>
@@ -95,14 +112,13 @@ const TAB_CONFIG = [
   { key: "share", label: "Share", icon: "🔗" },
 ];
 
-/* ================= PREMIUM DARK THEME STYLES ================= */
+/* ================= STYLES ================= */
 
 const styles = {
   page: {
     minHeight: "100vh",
     background: "linear-gradient(180deg, #020617 0%, #0f172a 100%)",
     color: "#f8fafc",
-    fontFamily: "'Inter', system-ui, sans-serif",
     padding: "40px 20px",
   },
   maxContainer: {
@@ -118,32 +134,23 @@ const styles = {
     gap: "12px",
   },
   badge: {
-    width: "fit-content",
     fontSize: "11px",
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: "1.5px",
-    background: "rgba(99, 102, 241, 0.1)",
+    background: "rgba(99,102,241,0.1)",
     color: "#818cf8",
     padding: "4px 12px",
     borderRadius: "20px",
-    border: "1px solid rgba(99, 102, 241, 0.2)",
   },
   title: {
     fontSize: "36px",
     fontWeight: "800",
-    margin: 0,
-    letterSpacing: "-1px",
     background: "linear-gradient(to right, #fff, #94a3b8)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
   },
   metaRow: {
     display: "flex",
-    alignItems: "center",
     gap: "12px",
     color: "#64748b",
-    fontSize: "15px",
   },
   dateBadge: {
     background: "rgba(255,255,255,0.03)",
@@ -151,50 +158,26 @@ const styles = {
     borderRadius: "8px",
   },
   tabsContainer: {
-    marginBottom: "24px",
     borderBottom: "1px solid rgba(255,255,255,0.05)",
+    marginBottom: "20px",
   },
   tabs: {
     display: "flex",
     gap: "8px",
-    overflowX: "auto",
-    paddingBottom: "1px", // for indicator
   },
   tabBtn: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: "12px 20px",
     background: "transparent",
     border: "none",
     color: "#94a3b8",
-    fontSize: "15px",
-    fontWeight: "500",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    whiteSpace: "nowrap",
+    padding: "12px 20px",
   },
   activeTab: {
     color: "#fff",
   },
-  activeIndicator: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "2px",
-    background: "#6366f1",
-    borderRadius: "2px 2px 0 0",
-    boxShadow: "0 -4px 10px rgba(99, 102, 241, 0.5)",
-  },
   contentPane: {
-    background: "rgba(30, 41, 59, 0.3)",
-    backdropFilter: "blur(20px)",
+    background: "rgba(30,41,59,0.3)",
     borderRadius: "24px",
-    border: "1px solid rgba(255,255,255,0.08)",
-    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-    overflow: "hidden",
   },
   innerContent: {
     padding: "32px",
@@ -205,12 +188,11 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    background: "#020617",
   },
   spinner: {
     width: "40px",
     height: "40px",
-    border: "3px solid rgba(99, 102, 241, 0.1)",
+    border: "3px solid rgba(99,102,241,0.1)",
     borderTopColor: "#6366f1",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
@@ -218,8 +200,7 @@ const styles = {
   loadingText: {
     marginTop: "16px",
     color: "#64748b",
-    fontSize: "14px",
-  }
+  },
 };
 
 export default TripDetails;

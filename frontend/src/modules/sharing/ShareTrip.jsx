@@ -4,14 +4,13 @@ import apiClient from "../../services/apiClient";
 function ShareTrip({ tripId }) {
   const [shareUrl, setShareUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const generateLink = async () => {
     setLoading(true);
     try {
       const res = await apiClient.post(`/shares/trip/${tripId}`);
       setShareUrl(res.data.shareUrl);
-    } catch (err) {
-      alert("Failed to generate share link");
     } finally {
       setLoading(false);
     }
@@ -19,7 +18,8 @@ function ShareTrip({ tripId }) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareUrl);
-    alert("Link copied to clipboard");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
   };
 
   return (
@@ -36,6 +36,12 @@ function ShareTrip({ tripId }) {
           <button onClick={copyToClipboard}>Copy</button>
         </div>
       )}
+
+      {copied && (
+        <div style={styles.toast}>
+          Link copied to clipboard
+        </div>
+      )}
     </div>
   );
 }
@@ -45,6 +51,13 @@ const styles = {
     marginTop: "15px",
     display: "flex",
     gap: "10px",
+  },
+  toast: {
+    marginTop: "8px",
+    background: "#e6fffa",
+    color: "#065f46",
+    padding: "6px",
+    borderRadius: "4px",
   },
 };
 

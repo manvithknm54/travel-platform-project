@@ -8,7 +8,13 @@ function BudgetView({ tripId }) {
   useEffect(() => {
     apiClient
       .get(`/budgets/trip/${tripId}`)
-      .then((res) => setBudget(res.data))
+      .then((res) => {
+        if (!res.data || res.data.totalCost === 0) {
+          setBudget(null);
+        } else {
+          setBudget(res.data);
+        }
+      })
       .catch(() => setBudget(null))
       .finally(() => setLoading(false));
   }, [tripId]);
@@ -16,7 +22,11 @@ function BudgetView({ tripId }) {
   if (loading) return <p>Loading budget...</p>;
 
   if (!budget) {
-    return <p>No budget data yet. Add activities to calculate costs.</p>;
+    return (
+      <p style={{ fontStyle: "italic", color: "#555" }}>
+        Budget will be calculated after adding activities.
+      </p>
+    );
   }
 
   return (
@@ -28,25 +38,30 @@ function BudgetView({ tripId }) {
       </p>
 
       <p>
-        <strong>Average Cost / Day:</strong> ₹{budget.averageCostPerDay}
+        <strong>Average Cost / Day:</strong> ₹
+        {budget.averageCostPerDay}
       </p>
 
       <h4>Cost by City</h4>
       <ul>
-        {Object.entries(budget.costByCity).map(([city, cost]) => (
-          <li key={city}>
-            {city}: ₹{cost}
-          </li>
-        ))}
+        {Object.entries(budget.costByCity).map(
+          ([city, cost]) => (
+            <li key={city}>
+              {city}: ₹{cost}
+            </li>
+          )
+        )}
       </ul>
 
       <h4>Cost by Day</h4>
       <ul>
-        {Object.entries(budget.costByDay).map(([day, cost]) => (
-          <li key={day}>
-            Day {day}: ₹{cost}
-          </li>
-        ))}
+        {Object.entries(budget.costByDay).map(
+          ([day, cost]) => (
+            <li key={day}>
+              Day {day}: ₹{cost}
+            </li>
+          )
+        )}
       </ul>
     </div>
   );

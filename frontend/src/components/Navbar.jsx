@@ -32,9 +32,9 @@ function Navbar() {
       <div style={styles.navContainer}>
         {/* Left: Brand / Logo */}
         <div style={styles.brand} onClick={() => navigate("/")}>
-          <div style={styles.logoIcon}>G</div>
+          <div style={styles.logoIcon}>S</div>
           <span style={styles.brandText}>
-            Globe<span style={styles.brandAccent}>Trotter</span>
+            Safa<span style={styles.brandAccent}>rify</span>
           </span>
         </div>
 

@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import apiClient from "../../services/apiClient";
 
 function ActivitySearch({ tripId }) {
-  const [query, setQuery] = useState("");
   const [activities, setActivities] = useState([]);
   const [stops, setStops] = useState([]);
   const [selectedStop, setSelectedStop] = useState("");
-  const [dayNumber, setDayNumber] = useState(1);
-  const [maxDays, setMaxDays] = useState(1);
+  const [allowedDays, setAllowedDays] = useState([]);
+  const [dayNumber, setDayNumber] = useState("");
+  const [tripStartDate, setTripStartDate] = useState(null);
   const [message, setMessage] = useState("");
 
-  // Load trip + stops
+  /* ================= LOAD TRIP + STOPS ================= */
   useEffect(() => {
     loadTripData();
   }, [tripId]);
@@ -19,31 +19,54 @@ function ActivitySearch({ tripId }) {
     const tripRes = await apiClient.get(`/trips/${tripId}`);
     const itineraryRes = await apiClient.get(`/itinerary/trip/${tripId}`);
 
-    const start = new Date(tripRes.data.startDate);
-    const end = new Date(tripRes.data.endDate);
-
-    const totalDays =
-      Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-
-    setMaxDays(totalDays);
+    setTripStartDate(new Date(tripRes.data.startDate));
     setStops(itineraryRes.data);
   };
 
-  // Search activities
+  /* ================= WHEN CITY CHANGES ================= */
   useEffect(() => {
-    if (!query) {
-      setActivities([]);
+    if (!selectedStop || !tripStartDate) {
+      setAllowedDays([]);
+      setDayNumber("");
       return;
     }
 
-    apiClient
-      .get("/activities", { params: { q: query } })
-      .then((res) => setActivities(res.data));
-  }, [query]);
+    const stop = stops.find((s) => s.id === selectedStop);
+    if (!stop) return;
 
+    const startDay =
+      Math.floor(
+        (new Date(stop.startDate) - tripStartDate) /
+          (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    const endDay =
+      Math.floor(
+        (new Date(stop.endDate) - tripStartDate) /
+          (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    const days = Array.from(
+      { length: endDay - startDay + 1 },
+      (_, i) => startDay + i
+    );
+
+    setAllowedDays(days);
+    setDayNumber(days[0]); // default to first valid day
+
+    /* Load activities for selected city */
+    apiClient
+      .get("/activities", {
+        params: { cityId: stop.city.id },
+      })
+      .then((res) => setActivities(res.data))
+      .catch(() => setActivities([]));
+  }, [selectedStop, stops, tripStartDate]);
+
+  /* ================= ADD ACTIVITY ================= */
   const addActivity = async (activity) => {
-    if (!selectedStop) {
-      setMessage("Please select a city first");
+    if (!selectedStop || !dayNumber) {
+      setMessage("Please select city and day");
       return;
     }
 
@@ -58,9 +81,9 @@ function ActivitySearch({ tripId }) {
     setMessage(
       `"${activity.title}" has been added to your trip (Day ${dayNumber})`
     );
-    setQuery("");
   };
 
+  /* ================= UI ================= */
   return (
     <div>
       <h3>Add Activities</h3>
@@ -72,7 +95,10 @@ function ActivitySearch({ tripId }) {
         City:
         <select
           value={selectedStop}
-          onChange={(e) => setSelectedStop(e.target.value)}
+          onChange={(e) => {
+            setSelectedStop(e.target.value);
+            setActivities([]);
+          }}
         >
           <option value="">-- Select City --</option>
           {stops.map((stop) => (
@@ -83,33 +109,26 @@ function ActivitySearch({ tripId }) {
         </select>
       </label>
 
-      {/* Day Selection */}
-      <label style={{ marginLeft: "10px" }}>
-        Day:
-        <select
-          value={dayNumber}
-          onChange={(e) => setDayNumber(Number(e.target.value))}
-        >
-          {Array.from({ length: maxDays }, (_, i) => i + 1).map(
-            (day) => (
+      {/* Day Selection (ONLY CITY DAYS) */}
+      {allowedDays.length > 0 && (
+        <label style={{ marginLeft: "10px" }}>
+          Day:
+          <select
+            value={dayNumber}
+            onChange={(e) => setDayNumber(Number(e.target.value))}
+          >
+            {allowedDays.map((day) => (
               <option key={day} value={day}>
                 {day}
               </option>
-            )
-          )}
-        </select>
-      </label>
+            ))}
+          </select>
+        </label>
+      )}
 
       <br /><br />
 
-      {/* Search */}
-      <input
-        type="text"
-        placeholder="Search activities..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-
+      {/* Activities List */}
       <ul>
         {activities.map((activity) => (
           <li key={activity.id} style={styles.item}>
@@ -121,6 +140,12 @@ function ActivitySearch({ tripId }) {
             </button>
           </li>
         ))}
+
+        {selectedStop && activities.length === 0 && (
+          <p style={{ opacity: 0.6 }}>
+            No activities available for this city.
+          </p>
+        )}
       </ul>
     </div>
   );
