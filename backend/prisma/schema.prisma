@@ -15,7 +15,7 @@ model User {
   profileImage String?
   createdAt    DateTime @default(now())
 
-  trips Trip[] // 👈 ADD THIS (IMPORTANT)
+  trips Trip[]
 }
 
 model Trip {
@@ -27,7 +27,7 @@ model Trip {
   createdAt   DateTime @default(now())
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   stops  Stop[]
   shares Share[]
@@ -37,10 +37,26 @@ model City {
   id        String @id @default(uuid())
   name      String
   country   String
-  costIndex Int
+  costIndex Int    @default(0)
 
   stops Stop[]
+  cityActivities CityActivity[]
+
+  @@unique([name, country])
 }
+
+
+model Activity {
+  id       String @id @default(uuid())
+  title    String @unique
+  category String
+  cost     Int
+  duration Int
+
+  stops StopActivity[]
+  cityActivities CityActivity[]
+}
+
 
 model Stop {
   id        String   @id @default(uuid())
@@ -49,22 +65,12 @@ model Stop {
   endDate   DateTime
 
   tripId String
-  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip   Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   cityId String
-  city   City   @relation(fields: [cityId], references: [id])
+  city   City @relation(fields: [cityId], references: [id])
 
   activities StopActivity[]
-}
-
-model Activity {
-  id       String @id @default(uuid())
-  title    String
-  category String
-  cost     Int
-  duration Int // in hours
-
-  stops StopActivity[]
 }
 
 model StopActivity {
@@ -72,7 +78,7 @@ model StopActivity {
   dayNumber Int
 
   stopId String
-  stop   Stop   @relation(fields: [stopId], references: [id], onDelete: Cascade)
+  stop   Stop @relation(fields: [stopId], references: [id], onDelete: Cascade)
 
   activityId String
   activity   Activity @relation(fields: [activityId], references: [id])
@@ -83,7 +89,19 @@ model Share {
   token String @unique
 
   tripId String
-  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip   Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+}
+
+model CityActivity {
+  id         String @id @default(uuid())
+
+  cityId     String
+  city       City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([cityId, activityId])
 }

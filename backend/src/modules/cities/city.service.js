@@ -1,31 +1,29 @@
 import prisma from "../../config/db.js";
 
-export const searchCitiesService = async (query) => {
-  const { q, country, minCost, maxCost } = query;
+export const searchCitiesService = async ({ q }) => {
+  if (!q || q.trim() === "") {
+    return [];
+  }
 
   return prisma.city.findMany({
     where: {
-      AND: [
-        q
-          ? {
-              name: {
-                contains: q,
-                mode: "insensitive",
-              },
-            }
-          : {},
-        country
-          ? {
-              country: {
-                equals: country,
-                mode: "insensitive",
-              },
-            }
-          : {},
-        minCost ? { costIndex: { gte: Number(minCost) } } : {},
-        maxCost ? { costIndex: { lte: Number(maxCost) } } : {},
+      OR: [
+        {
+          name: {
+            contains: q,
+            mode: "insensitive",
+          },
+        },
+        {
+          country: {
+            contains: q,
+            mode: "insensitive",
+          },
+        },
       ],
     },
-    orderBy: { name: "asc" },
+    orderBy: {
+      name: "asc",
+    },
   });
 };

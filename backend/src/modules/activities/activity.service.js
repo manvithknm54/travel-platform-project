@@ -1,32 +1,30 @@
 import prisma from "../../config/db.js";
 
-export const searchActivitiesService = async (query) => {
-  const { q, category, minCost, maxCost, maxDuration } = query;
+export const searchActivitiesService = async ({ q, cityId }) => {
+  if (!cityId) {
+    return [];
+  }
 
-  return prisma.activity.findMany({
+  const results = await prisma.cityActivity.findMany({
     where: {
-      AND: [
-        q
-          ? {
-              title: {
-                contains: q,
-                mode: "insensitive",
-              },
-            }
-          : {},
-        category
-          ? {
-              category: {
-                equals: category,
-                mode: "insensitive",
-              },
-            }
-          : {},
-        minCost ? { cost: { gte: Number(minCost) } } : {},
-        maxCost ? { cost: { lte: Number(maxCost) } } : {},
-        maxDuration ? { duration: { lte: Number(maxDuration) } } : {},
-      ],
+      cityId,
+      activity: {
+        title: {
+          contains: q || "",
+          mode: "insensitive",
+        },
+      },
     },
-    orderBy: { title: "asc" },
+    include: {
+      activity: true,
+    },
+    orderBy: {
+      activity: {
+        title: "asc",
+      },
+    },
   });
+
+  // Return only activity objects
+  return results.map((r) => r.activity);
 };
