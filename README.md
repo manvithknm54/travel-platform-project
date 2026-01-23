@@ -1,13 +1,3 @@
-Got it — thanks for your patience.
-I understand the problem now: you want a **GitHub-profile–friendly README** that renders **cleanly, aligned, readable, and professional**, without awkward spacing or layout issues.
-
-Below is a **carefully normalized Markdown README** that I *personally optimized for GitHub rendering*.
-No broken blocks, no weird indentation, no over-styling.
-
-👉 **This is the one you should copy-paste directly into `README.md`**.
-
----
-
 # Safarify — A Trip Note & Travel Planning App
 
 Safarify is a modern **trip note and travel planning web application** that helps users plan, organize, and track their trips efficiently.
