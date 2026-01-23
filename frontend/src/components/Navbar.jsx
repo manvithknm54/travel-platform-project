@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../services/apiClient";
+import favicon from "./favicon3.png";
 
 function Navbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
 
+  /* ================= THEME STATE ================= */
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+
+  /* APPLY THEME GLOBALLY */
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  /* LOAD USER */
   useEffect(() => {
     const loadUser = () => {
       apiClient.get("/users/me")
@@ -15,8 +26,6 @@ function Navbar() {
     };
 
     loadUser();
-
-    // Listen for profile updates to refresh avatar/name instantly
     window.addEventListener("profile-updated", loadUser);
     return () => window.removeEventListener("profile-updated", loadUser);
   }, []);
@@ -27,203 +36,280 @@ function Navbar() {
     navigate("/login");
   };
 
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
   return (
     <nav style={styles.nav}>
+      {/* INJECTED ANIMATIONS FOR SUPER APP LOGO */}
+      <style>{`
+        @keyframes logo-float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-3px); }
+          100% { transform: translateY(0px); }
+        }
+        .brand-container:hover .logo-icon-wrapper {
+          transform: scale(1.1) rotate(-3deg);
+          box-shadow: 0 0 20px var(--primary);
+        }
+        .brand-container:hover .brand-text {
+          color: var(--primary) !important;
+          transform: translateX(4px);
+        }
+      `}</style>
+
       <div style={styles.navContainer}>
-        {/* Left: Brand / Logo */}
-        <div style={styles.brand} onClick={() => navigate("/")}>
-          <div style={styles.logoIcon}>S</div>
-          <span style={styles.brandText}>
+        {/* BRAND AREA WITH HOVER CLASS */}
+        <div 
+          className="brand-container" 
+          style={styles.brand} 
+          onClick={() => navigate("/")}
+        >
+          <div className="logo-icon-wrapper" style={styles.logoIcon}>
+            {/* REPLACE THIS URL WITH YOUR LOGO IMAGE PATH */}
+            <img 
+              src={favicon} 
+              alt="Safarify" 
+              style={styles.logoImage} 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentNode.innerText = 'S';
+              }}
+            />
+          </div>
+          <span className="brand-text" style={styles.brandText}>
             Safa<span style={styles.brandAccent}>rify</span>
           </span>
         </div>
 
-        {/* Right: Profile Dropdown */}
-        <div style={styles.profileArea}>
+        {/* RIGHT SIDE */}
+        <div style={styles.rightArea}>
+          {/* 🌗 ANIMATED THEME TOGGLE */}
           <div
-            style={{
-              ...styles.avatar,
-              border: open ? "2px solid #6366F1" : "2px solid rgba(255,255,255,0.1)",
-            }}
-            onClick={() => setOpen(!open)}
+            style={styles.themeSwitch}
+            onClick={toggleTheme}
+            role="button"
+            aria-label="Toggle theme"
           >
-            {user?.profileImage ? (
-              <img src={user.profileImage} alt="avatar" style={styles.img} />
-            ) : (
-              <span style={styles.initials}>{user?.name?.[0]?.toUpperCase() || "U"}</span>
-            )}
+            <div
+              style={{
+                ...styles.switchThumb,
+                transform:
+                  theme === "dark" ? "translateX(0)" : "translateX(26px)",
+              }}
+            >
+              <span style={styles.icon}>
+                {theme === "dark" ? "🌙" : "🌞"}
+              </span>
+            </div>
           </div>
 
-          {open && (
-            <>
-              {/* Clickable backdrop to close dropdown when clicking outside */}
-              <div style={styles.backdrop} onClick={() => setOpen(false)} />
-              
-              <div style={styles.dropdown}>
-                <div style={styles.userHeader}>
-                  <p style={styles.userName}>{user?.name || "Traveler"}</p>
-                  <p style={styles.userEmail}>{user?.email || "Account Active"}</p>
+          {/* PROFILE */}
+          <div style={styles.profileArea}>
+            <div
+              style={{
+                ...styles.avatar,
+                border: open
+                  ? "2px solid var(--primary)"
+                  : "2px solid var(--border)",
+              }}
+              onClick={() => setOpen(!open)}
+            >
+              {user?.profileImage ? (
+                <img src={user.profileImage} alt="avatar" style={styles.img} />
+              ) : (
+                <span style={styles.initials}>
+                  {user?.name?.[0]?.toUpperCase() || "U"}
+                </span>
+              )}
+            </div>
+
+            {open && (
+              <>
+                <div style={styles.backdrop} onClick={() => setOpen(false)} />
+                <div style={styles.dropdown}>
+                  <div style={styles.userHeader}>
+                    <p style={styles.userName}>{user?.name}</p>
+                    <p style={styles.userEmail}>{user?.email}</p>
+                  </div>
+                  <div style={styles.divider} />
+                  <div
+                    style={styles.item}
+                    onClick={() => {
+                      setOpen(false);
+                      navigate("/profile");
+                    }}
+                  >
+                    ⚙️ Settings
+                  </div>
+                  <div style={styles.divider} />
+                  <div style={styles.logoutItem} onClick={logout}>
+                    🚪 Log Out
+                  </div>
                 </div>
-                
-                <div style={styles.divider} />
-                
-                <div 
-                  style={styles.item} 
-                  onClick={() => { setOpen(false); navigate("/profile"); }}
-                >
-                  <span style={styles.icon}>⚙️</span> Settings
-                </div>
-                
-                <div style={styles.divider} />
-                
-                <div style={styles.logoutItem} onClick={logout}>
-                  <span style={styles.icon}>🚪</span> Log Out
-                </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>
   );
 }
 
-/* ================= PREMIUM STYLES ================= */
+/* ================= STYLES ================= */
 
 const styles = {
   nav: {
-    height: "72px",
+    height: "80px",
     position: "sticky",
     top: 0,
     zIndex: 1000,
-    background: "rgba(2, 6, 23, 0.8)",
-    backdropFilter: "blur(12px)",
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
-    fontFamily: "'Inter', sans-serif",
+    background: "var(--surface)",
+    borderBottom: "1px solid var(--border)",
   },
+
   navContainer: {
     maxWidth: "1200px",
     height: "100%",
     margin: "0 auto",
+    padding: "0 24px",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "0 24px",
   },
+
   brand: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "14px",
     cursor: "pointer",
+    transition: "all 0.3s ease",
   },
+
   logoIcon: {
-    width: "34px",
-    height: "34px",
-    background: "linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)",
-    borderRadius: "10px",
+    width: "42px",
+    height: "42px",
+    background: "var(--primary)",
+    borderRadius: "14px", // iOS-style Squircle
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     color: "#fff",
-    fontWeight: "800",
-    fontSize: "18px",
-    boxShadow: "0 4px 12px rgba(79, 70, 229, 0.3)",
-  },
-  brandText: {
+    fontWeight: "900",
     fontSize: "22px",
-    fontWeight: "700",
-    color: "#fff",
+    overflow: "hidden",
+    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+  },
+
+  logoImage: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+
+  brandText: {
+    fontSize: "24px",
+    fontWeight: "800",
+    color: "var(--text-primary)",
+    transition: "all 0.3s ease",
     letterSpacing: "-0.5px",
   },
+
   brandAccent: {
-    color: "#818cf8",
+    color: "var(--primary)",
   },
+
+  rightArea: {
+    display: "flex",
+    alignItems: "center",
+    gap: "20px",
+  },
+
+  /* ===== THEME SWITCH ===== */
+  themeSwitch: {
+    width: "52px",
+    height: "28px",
+    borderRadius: "999px",
+    background: "var(--border)",
+    position: "relative",
+    cursor: "pointer",
+    transition: "background 0.3s ease",
+    display: "flex",
+    alignItems: "center",
+    padding: "2px",
+  },
+
+  switchThumb: {
+    width: "24px",
+    height: "24px",
+    borderRadius: "50%",
+    background: "var(--surface)",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+    transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  icon: {
+    fontSize: "14px",
+    pointerEvents: "none",
+  },
+
+  /* ===== PROFILE ===== */
   profileArea: {
     position: "relative",
   },
+
   avatar: {
-    width: "42px",
-    height: "42px",
-    borderRadius: "14px", // Matches the "Squircle" design of the app
-    background: "#1e293b",
+    width: "44px",
+    height: "44px",
+    borderRadius: "14px",
+    background: "var(--bg)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
     overflow: "hidden",
-    transition: "all 0.2s ease",
+    transition: "all 0.3s ease",
   },
+
   initials: {
-    color: "#fff",
     fontWeight: "700",
-    fontSize: "16px",
+    color: "var(--text-primary)",
   },
+
   img: {
     width: "100%",
     height: "100%",
     objectFit: "cover",
   },
+
   backdrop: {
     position: "fixed",
     inset: 0,
-    zIndex: 90,
   },
+
   dropdown: {
     position: "absolute",
     right: 0,
-    top: "56px",
+    top: "60px",
     width: "220px",
-    background: "#0f172a",
+    background: "var(--surface)",
     borderRadius: "16px",
-    border: "1px solid rgba(255,255,255,0.1)",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
-    padding: "8px",
-    zIndex: 100,
+    border: "1px solid var(--border)",
+    padding: "10px",
+    boxShadow: "0 25px 50px -12px rgba(0,0,0,0.6)",
   },
-  userHeader: {
-    padding: "12px 16px",
-  },
-  userName: {
-    fontSize: "15px",
-    fontWeight: "600",
-    color: "#fff",
-    margin: 0,
-  },
-  userEmail: {
-    fontSize: "12px",
-    color: "#64748b",
-    margin: "2px 0 0 0",
-  },
-  divider: {
-    height: "1px",
-    background: "rgba(255,255,255,0.06)",
-    margin: "6px 0",
-  },
-  item: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    padding: "10px 16px",
-    fontSize: "14px",
-    color: "#cbd5e1",
-    cursor: "pointer",
-    borderRadius: "10px",
-    transition: "background 0.2s",
-  },
-  logoutItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    padding: "10px 16px",
-    fontSize: "14px",
-    color: "#f87171", // Soft red for logout
-    cursor: "pointer",
-    borderRadius: "10px",
-    transition: "background 0.2s",
-  },
-  icon: {
-    fontSize: "16px",
-  },
+
+  userHeader: { padding: "12px" },
+  userName: { fontWeight: "700", color: "var(--text-primary)" },
+  userEmail: { fontSize: "12px", color: "var(--text-secondary)" },
+  divider: { height: "1px", background: "var(--border)", margin: "8px 0" },
+  item: { padding: "10px 12px", cursor: "pointer", borderRadius: "8px", color: "var(--text-primary)" },
+  logoutItem: { padding: "10px 12px", cursor: "pointer", borderRadius: "8px", color: "#EF4444" },
 };
 
 export default Navbar;

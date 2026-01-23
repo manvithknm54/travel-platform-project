@@ -12,6 +12,7 @@ function Signup() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [activeField, setActiveField] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,21 +25,23 @@ function Signup() {
 
   return (
     <div style={styles.page}>
-      <form 
-        onSubmit={handleSubmit} 
+      <div style={styles.bgGlow}></div>
+
+      <form
+        onSubmit={handleSubmit}
         style={{
           ...styles.card,
-          transform: isHovered ? "translateY(-5px)" : "translateY(0px)",
-          boxShadow: isHovered 
-            ? "0 25px 50px -12px rgba(0, 0, 0, 0.7)" 
-            : "0 20px 40px rgba(0,0,0,0.6)"
+          transform: isHovered ? "translateY(-8px)" : "translateY(0px)",
+          boxShadow: isHovered
+            ? "0 30px 60px -12px rgba(0, 0, 0, 0.8)"
+            : "0 20px 40px rgba(0, 0, 0, 0.4)",
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div style={styles.headerGroup}>
           <h2 style={styles.title}>Create Account</h2>
-          <p style={styles.subtitle}>Join our community and start your journey</p>
+          <p style={styles.subtitle}>Join Safarify and start your journey</p>
         </div>
 
         {error && <div style={styles.errorBox}>{error}</div>}
@@ -46,7 +49,19 @@ function Signup() {
         <div style={styles.inputGroup}>
           <label style={styles.label}>Full Name</label>
           <input
-            style={styles.input}
+            style={{
+              ...styles.input,
+              borderColor:
+                activeField === "name"
+                  ? "var(--primary)"
+                  : "var(--border)",
+              boxShadow:
+                activeField === "name"
+                  ? "0 0 0 4px rgba(22, 101, 52, 0.15)"
+                  : "none",
+            }}
+            onFocus={() => setActiveField("name")}
+            onBlur={() => setActiveField(null)}
             type="text"
             name="name"
             placeholder="John Doe"
@@ -59,7 +74,19 @@ function Signup() {
         <div style={styles.inputGroup}>
           <label style={styles.label}>Email Address</label>
           <input
-            style={styles.input}
+            style={{
+              ...styles.input,
+              borderColor:
+                activeField === "email"
+                  ? "var(--primary)"
+                  : "var(--border)",
+              boxShadow:
+                activeField === "email"
+                  ? "0 0 0 4px rgba(22, 101, 52, 0.15)"
+                  : "none",
+            }}
+            onFocus={() => setActiveField("email")}
+            onBlur={() => setActiveField(null)}
             type="email"
             name="email"
             placeholder="name@example.com"
@@ -73,7 +100,19 @@ function Signup() {
           <label style={styles.label}>Password</label>
           <div style={styles.passwordWrapper}>
             <input
-              style={styles.input}
+              style={{
+                ...styles.input,
+                borderColor:
+                  activeField === "password"
+                    ? "var(--primary)"
+                    : "var(--border)",
+                boxShadow:
+                  activeField === "password"
+                    ? "0 0 0 4px rgba(22, 101, 52, 0.15)"
+                    : "none",
+              }}
+              onFocus={() => setActiveField("password")}
+              onBlur={() => setActiveField(null)}
               type={showPassword ? "text" : "password"}
               name="password"
               placeholder="••••••••"
@@ -85,7 +124,7 @@ function Signup() {
               style={styles.eye}
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? "🔒" : "👁️"}
+              {showPassword ? "🙈" : "👁️"}
             </span>
           </div>
         </div>
@@ -96,6 +135,7 @@ function Signup() {
             ...styles.button,
             filter: loading ? "grayscale(0.5)" : "none",
             cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.8 : 1,
           }}
           disabled={loading}
         >
@@ -113,7 +153,7 @@ function Signup() {
   );
 }
 
-/* ================= PREMIUM DARK THEME STYLES ================= */
+/* ================= THEME-AWARE STYLES ================= */
 
 const styles = {
   page: {
@@ -121,23 +161,36 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "linear-gradient(135deg, #0f172a 0%, #020617 100%)",
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    backgroundColor: "var(--bg)",
+    fontFamily: "'Inter', sans-serif",
     padding: "20px",
+    position: "relative",
+    overflow: "hidden",
+  },
+
+  bgGlow: {
+    position: "absolute",
+    width: "50vw",
+    height: "50vw",
+    background:
+      "radial-gradient(circle, rgba(22, 101, 52, 0.06) 0%, rgba(0, 0, 0, 0) 70%)",
+    bottom: "-15%",
+    left: "-10%",
+    zIndex: 0,
   },
 
   card: {
+    zIndex: 1,
     width: "100%",
-    maxWidth: "420px",
+    maxWidth: "400px",
     padding: "40px",
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
-    borderRadius: "24px",
-    background: "rgba(30, 41, 59, 0.5)", 
-    border: "1px solid rgba(255, 255, 255, 0.08)",
-    backdropFilter: "blur(16px)",
-    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    gap: "24px",
+    borderRadius: "28px",
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    transition: "all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)",
   },
 
   headerGroup: {
@@ -146,17 +199,20 @@ const styles = {
   },
 
   title: {
-    fontSize: "28px",
-    fontWeight: "700",
-    color: "#ffffff",
-    letterSpacing: "-0.5px",
+    fontSize: "32px",
+    fontWeight: "800",
+    letterSpacing: "-1px",
     margin: "0 0 8px 0",
+    background:
+      "linear-gradient(to bottom, var(--text-primary), var(--text-secondary))",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
   },
 
   subtitle: {
-    fontSize: "14px",
-    color: "#94a3b8",
-    lineHeight: "1.5",
+    fontSize: "15px",
+    color: "var(--text-secondary)",
+    fontWeight: "400",
   },
 
   inputGroup: {
@@ -166,22 +222,24 @@ const styles = {
   },
 
   label: {
-    fontSize: "13px",
-    fontWeight: "500",
-    color: "#cbd5e1",
-    marginLeft: "4px",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "var(--text-secondary)",
+    letterSpacing: "0.5px",
+    textTransform: "uppercase",
+    paddingLeft: "4px",
   },
 
   input: {
     width: "100%",
     padding: "14px 16px",
-    borderRadius: "12px",
-    background: "rgba(15, 23, 42, 0.8)",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    color: "#f8fafc",
+    borderRadius: "14px",
+    background: "var(--bg)",
+    border: "1px solid var(--border)",
+    color: "var(--text-primary)",
     outline: "none",
     fontSize: "15px",
-    transition: "all 0.2s ease",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
     boxSizing: "border-box",
   },
 
@@ -197,29 +255,30 @@ const styles = {
     transform: "translateY(-50%)",
     cursor: "pointer",
     fontSize: "18px",
-    opacity: 0.5,
-    transition: "opacity 0.2s",
+    opacity: 0.6,
   },
 
   button: {
-    marginTop: "10px",
-    padding: "14px",
-    borderRadius: "12px",
+    marginTop: "8px",
+    padding: "16px",
+    borderRadius: "14px",
     border: "none",
-    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", // Green for signup
-    color: "#ffffff",
+    background:
+      "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)",
+    color: "#FFFFFF",
     fontSize: "16px",
-    fontWeight: "600",
-    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)",
+    fontWeight: "700",
+    letterSpacing: "0.5px",
+    boxShadow: "0 10px 20px -10px rgba(22, 101, 52, 0.5)",
     transition: "all 0.3s ease",
   },
 
   errorBox: {
-    background: "rgba(239, 68, 68, 0.1)",
+    background: "rgba(239, 68, 68, 0.08)",
     border: "1px solid rgba(239, 68, 68, 0.2)",
-    color: "#fca5a5",
+    color: "#ef4444",
     padding: "12px",
-    borderRadius: "10px",
+    borderRadius: "12px",
     fontSize: "13px",
     textAlign: "center",
   },
@@ -227,15 +286,14 @@ const styles = {
   footer: {
     textAlign: "center",
     fontSize: "14px",
-    color: "#94a3b8",
-    marginTop: "4px",
+    color: "var(--text-secondary)",
+    marginTop: "8px",
   },
 
   link: {
-    color: "#10b981",
+    color: "var(--primary)",
     textDecoration: "none",
-    fontWeight: "600",
-    transition: "color 0.2s",
+    fontWeight: "700",
   },
 };
 

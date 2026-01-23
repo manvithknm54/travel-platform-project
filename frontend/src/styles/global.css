@@ -1,231 +1,46 @@
-
+/* ================= RESET ================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* =========================
-   Base Layout
-   ========================= */
+/* ================= THEME VARIABLES ================= */
 
-html,
-body {
+:root {
+  /* DARK MODE (DEFAULT) */
+  --bg: #0C0A09;
+  --surface: #1C1917;
+  --primary: #22C55E;
+  --primary-hover: #16A34A;
+  --accent: #D97706;
+  --text-primary: #FAFAF9;
+  --text-secondary: #A8A29E;
+  --border: #292524;
+}
+
+html[data-theme="light"] {
+  --bg: #FAFAF9;
+  --surface: #FFFFFF;
+  --primary: #166534;
+  --primary-hover: #14532D;
+  --accent: #D97706;
+  --text-primary: #1C1917;
+  --text-secondary: #57534E;
+  --border: #E7E5E4;
+}
+
+/* ================= BASE ================= */
+
+html, body {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-    sans-serif;
-
-  background-color: #0D1B2A; /* Deep Midnight */
-  color: #E0E1DD; /* Ice Mist */
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
   line-height: 1.6;
+  transition: background 0.3s ease, color 0.3s ease;
 }
-
-/* =========================
-   Typography
-   ========================= */
-
-h1,
-h2,
-h3,
-h4 {
-  color: #E0E1DD; /* Ice Mist */
-  font-weight: 600;
-}
-
-h1 {
-  font-size: 1.9rem;
-  margin-bottom: 12px;
-}
-
-h2 {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-
-h3 {
-  font-size: 1.2rem;
-  margin-bottom: 8px;
-}
-
-p {
-  font-size: 0.95rem;
-  color: #E0E1DD;
-  margin-bottom: 8px;
-}
-
-/* Text on light cards */
-.text-dark {
-  color: #1B263B; /* Charcoal Blue */
-}
-
-/* =========================
-   Containers & Cards
-   ========================= */
-
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.card {
-  background-color: #E0E1DD; /* Ice Mist */
-  color: #1B263B; /* Charcoal Blue */
-  border-radius: 8px;
-  padding: 18px;
-  margin-bottom: 16px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-}
-
-/* =========================
-   Buttons
-   ========================= */
 
 button {
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-
-  background-color: #415A77; /* Steel Blue */
-  color: #E0E1DD;
-
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-button:hover {
-  background-color: #2f4660;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-button:disabled {
-  background-color: #778da9;
-  cursor: not-allowed;
-}
-
-/* Danger buttons */
-button.danger {
-  background-color: #8b1e1e;
-}
-
-button.danger:hover {
-  background-color: #6e1717;
-}
-
-/* =========================
-   Forms & Inputs
-   ========================= */
-
-input,
-select,
-textarea {
-  padding: 8px 10px;
-  font-size: 0.9rem;
-  border-radius: 5px;
-  border: 1px solid #415A77;
-  width: 100%;
-  margin-bottom: 10px;
-
-  background-color: #E0E1DD;
-  color: #1B263B;
-}
-
-input::placeholder {
-  color: #5c677d;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #415A77;
-  box-shadow: 0 0 0 2px rgba(65, 90, 119, 0.35);
-}
-
-label {
-  font-size: 0.85rem;
-  color: #E0E1DD;
-  margin-bottom: 4px;
-  display: block;
-}
-
-/* =========================
-   Links
-   ========================= */
-
-a {
-  color: #778da9;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* =========================
-   Lists
-   ========================= */
-
-ul {
-  list-style: none;
-}
-
-li {
-  margin-bottom: 6px;
-}
-
-/* =========================
-   Flex Utilities
-   ========================= */
-
-.flex {
-  display: flex;
-}
-
-.flex-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.flex-gap {
-  display: flex;
-  gap: 10px;
-}
-
-/* =========================
-   Spacing Utilities
-   ========================= */
-
-.mt-1 {
-  margin-top: 8px;
-}
-
-.mt-2 {
-  margin-top: 16px;
-}
-
-.mb-1 {
-  margin-bottom: 8px;
-}
-
-.mb-2 {
-  margin-bottom: 16px;
-}
-
-/* =========================
-   Muted / Helper Text
-   ========================= */
-
-.text-muted {
-  color: #9aa3b2;
-}
-
-.text-center {
-  text-align: center;
+  font-family: inherit;
 }

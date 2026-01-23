@@ -11,6 +11,7 @@ function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [activeField, setActiveField] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,21 +24,23 @@ function Login() {
 
   return (
     <div style={styles.page}>
-      <form 
-        onSubmit={handleSubmit} 
+      <div style={styles.bgGlow}></div>
+
+      <form
+        onSubmit={handleSubmit}
         style={{
           ...styles.card,
-          transform: isHovered ? "translateY(-5px)" : "translateY(0px)",
-          boxShadow: isHovered 
-            ? "0 25px 50px -12px rgba(0, 0, 0, 0.7)" 
-            : "0 20px 40px rgba(0,0,0,0.6)"
+          transform: isHovered ? "translateY(-8px)" : "translateY(0px)",
+          boxShadow: isHovered
+            ? "0 30px 60px -12px rgba(0, 0, 0, 0.8)"
+            : "0 20px 40px rgba(0, 0, 0, 0.4)",
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div style={styles.headerGroup}>
-          <h2 style={styles.title}>Welcome Back</h2>
-          <p style={styles.subtitle}>Enter your credentials to access your account</p>
+          <h2 style={styles.title}>Safarify</h2>
+          <p style={styles.subtitle}>Log in to continue your adventure</p>
         </div>
 
         {error && <div style={styles.errorBox}>{error}</div>}
@@ -45,10 +48,22 @@ function Login() {
         <div style={styles.inputGroup}>
           <label style={styles.label}>Email Address</label>
           <input
-            style={styles.input}
+            style={{
+              ...styles.input,
+              borderColor:
+                activeField === "email"
+                  ? "var(--primary)"
+                  : "var(--border)",
+              boxShadow:
+                activeField === "email"
+                  ? "0 0 0 4px rgba(22, 101, 52, 0.15)"
+                  : "none",
+            }}
+            onFocus={() => setActiveField("email")}
+            onBlur={() => setActiveField(null)}
             type="email"
             name="email"
-            placeholder="name@company.com"
+            placeholder="name@example.com"
             value={form.email}
             onChange={handleChange}
             required
@@ -59,7 +74,19 @@ function Login() {
           <label style={styles.label}>Password</label>
           <div style={styles.passwordWrapper}>
             <input
-              style={styles.input}
+              style={{
+                ...styles.input,
+                borderColor:
+                  activeField === "password"
+                    ? "var(--primary)"
+                    : "var(--border)",
+                boxShadow:
+                  activeField === "password"
+                    ? "0 0 0 4px rgba(22, 101, 52, 0.15)"
+                    : "none",
+              }}
+              onFocus={() => setActiveField("password")}
+              onBlur={() => setActiveField(null)}
               type={showPassword ? "text" : "password"}
               name="password"
               placeholder="••••••••"
@@ -71,7 +98,7 @@ function Login() {
               style={styles.eye}
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? "🔒" : "👁️"}
+              {showPassword ? "🙈" : "👁️"}
             </span>
           </div>
         </div>
@@ -82,16 +109,18 @@ function Login() {
             ...styles.button,
             filter: loading ? "grayscale(0.5)" : "none",
             cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.7 : 1,
+            transform: loading ? "scale(0.98)" : "scale(1)",
           }}
           disabled={loading}
         >
-          {loading ? "Authenticating..." : "Sign In"}
+          {loading ? "Verifying..." : "Sign In to Safarify"}
         </button>
 
         <p style={styles.footer}>
-          New here?{" "}
+          New to the wild?{" "}
           <Link to="/signup" style={styles.link}>
-            Create an account
+            Join the journey
           </Link>
         </p>
       </form>
@@ -99,7 +128,7 @@ function Login() {
   );
 }
 
-/* ================= PREMIUM DARK THEME STYLES ================= */
+/* ================= THEME-AWARE DESIGN ================= */
 
 const styles = {
   page: {
@@ -107,69 +136,84 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "linear-gradient(135deg, #0f172a 0%, #020617 100%)",
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    backgroundColor: "var(--bg)",
+    fontFamily: "'Inter', sans-serif",
     padding: "20px",
+    position: "relative",
+    overflow: "hidden",
+  },
+
+  bgGlow: {
+    position: "absolute",
+    width: "40vw",
+    height: "40vw",
+    background:
+      "radial-gradient(circle, rgba(22, 101, 52, 0.08) 0%, rgba(0, 0, 0, 0) 70%)",
+    top: "-10%",
+    right: "-10%",
+    zIndex: 0,
   },
 
   card: {
+    zIndex: 1,
     width: "100%",
-    maxWidth: "420px",
-    padding: "40px",
+    maxWidth: "400px",
+    padding: "48px 40px",
     display: "flex",
     flexDirection: "column",
-    gap: "24px",
-    borderRadius: "24px",
-    background: "rgba(30, 41, 59, 0.5)", // Semi-transparent for glass effect
-    border: "1px solid rgba(255, 255, 255, 0.08)",
-    backdropFilter: "blur(16px)",
-    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    gap: "28px",
+    borderRadius: "28px",
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    transition: "all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)",
   },
 
   headerGroup: {
     textAlign: "center",
-    marginBottom: "8px",
   },
 
   title: {
-    fontSize: "28px",
-    fontWeight: "700",
-    color: "#ffffff",
-    letterSpacing: "-0.5px",
-    margin: "0 0 8px 0",
+    fontSize: "32px",
+    fontWeight: "800",
+    letterSpacing: "-1px",
+    margin: "0 0 10px 0",
+    background: "linear-gradient(to bottom, var(--text-primary), var(--text-secondary))",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
   },
 
   subtitle: {
-    fontSize: "14px",
-    color: "#94a3b8",
-    lineHeight: "1.5",
+    fontSize: "15px",
+    color: "var(--text-secondary)",
+    fontWeight: "400",
   },
 
   inputGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "10px",
   },
 
   label: {
     fontSize: "13px",
-    fontWeight: "500",
-    color: "#cbd5e1",
-    marginLeft: "4px",
+    fontWeight: "600",
+    color: "var(--text-secondary)",
+    letterSpacing: "0.5px",
+    textTransform: "uppercase",
+    paddingLeft: "4px",
   },
 
   input: {
     width: "100%",
-    padding: "14px 16px",
-    borderRadius: "12px",
-    background: "rgba(15, 23, 42, 0.8)",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    color: "#f8fafc",
+    padding: "16px",
+    borderRadius: "14px",
+    background: "var(--bg)",
+    border: "1px solid var(--border)",
+    color: "var(--text-primary)",
     outline: "none",
-    fontSize: "15px",
-    transition: "all 0.2s ease",
+    fontSize: "16px",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
     boxSizing: "border-box",
-    // Add box-shadow on focus via actual CSS if possible, but inline:
   },
 
   passwordWrapper: {
@@ -184,46 +228,47 @@ const styles = {
     transform: "translateY(-50%)",
     cursor: "pointer",
     fontSize: "18px",
-    opacity: 0.5,
+    opacity: 0.6,
     transition: "opacity 0.2s",
-    "&:hover": { opacity: 1 },
   },
 
   button: {
-    marginTop: "12px",
-    padding: "14px",
-    borderRadius: "12px",
+    marginTop: "10px",
+    padding: "16px",
+    borderRadius: "14px",
     border: "none",
-    background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+    background:
+      "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)",
     color: "#ffffff",
     fontSize: "16px",
-    fontWeight: "600",
-    boxShadow: "0 4px 12px rgba(79, 70, 229, 0.3)",
-    transition: "all 0.3s ease",
+    fontWeight: "700",
+    letterSpacing: "0.5px",
+    boxShadow: "0 10px 20px -10px rgba(22, 101, 52, 0.5)",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   },
 
   errorBox: {
-    background: "rgba(239, 68, 68, 0.1)",
+    background: "rgba(239, 68, 68, 0.08)",
     border: "1px solid rgba(239, 68, 68, 0.2)",
-    color: "#fca5a5",
-    padding: "12px",
-    borderRadius: "10px",
-    fontSize: "13px",
+    color: "#ef4444",
+    padding: "14px",
+    borderRadius: "12px",
+    fontSize: "14px",
     textAlign: "center",
   },
 
   footer: {
     textAlign: "center",
     fontSize: "14px",
-    color: "#94a3b8",
-    marginTop: "8px",
+    color: "var(--text-secondary)",
+    marginTop: "10px",
   },
 
   link: {
-    color: "#818cf8",
+    color: "var(--primary)",
     textDecoration: "none",
-    fontWeight: "600",
-    transition: "color 0.2s",
+    fontWeight: "700",
+    transition: "all 0.2s ease",
   },
 };
 

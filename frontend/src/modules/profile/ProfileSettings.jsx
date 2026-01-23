@@ -8,7 +8,7 @@ function ProfileSettings() {
   const [savedImage, setSavedImage] = useState("");
   const [tempImage, setTempImage] = useState("");
   const [imageEdit, setImageEdit] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false); // Modal State
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const [editName, setEditName] = useState(false);
   const [editEmail, setEditEmail] = useState(false);
@@ -50,7 +50,7 @@ function ProfileSettings() {
     setSavedImage("");
     setTempImage("");
     setImageEdit(false);
-    setShowConfirm(false); // Close Modal
+    setShowConfirm(false);
     window.dispatchEvent(new Event("profile-updated"));
   };
 
@@ -64,47 +64,45 @@ function ProfileSettings() {
   const saveEmail = async () => {
     await apiClient.put("/users/profile", { email: profile.email });
     setEditEmail(false);
+    window.dispatchEvent(new Event("profile-updated"));
   };
 
   const updatePassword = async () => {
     setPasswordMsg(""); setPasswordSuccess("");
-    if (newPwd !== confirmPwd) { setPasswordMsg("New passwords do not match"); return; }
+    if (newPwd !== confirmPwd) { setPasswordMsg("Passwords do not match"); return; }
     try {
       await apiClient.put("/users/change-password", { oldPassword: oldPwd, newPassword: newPwd });
       setOldPwd(""); setNewPwd(""); setConfirmPwd(""); setShowPasswordFields(false);
-      setPasswordSuccess("Password updated successfully");
-    } catch (err) { setPasswordMsg(err.response?.data?.message || "Failed to update password"); }
+      setPasswordSuccess("Security updated successfully");
+    } catch (err) {
+      setPasswordMsg(err.response?.data?.message || "Verification failed");
+    }
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
         <header style={styles.header}>
-          <h2 style={styles.pageTitle}>Account Settings</h2>
-          <p style={styles.pageSubtitle}>Manage your public profile and security preferences</p>
+          <h2 style={styles.pageTitle}>Explorer Settings</h2>
+          <p style={styles.pageSubtitle}>Manage your safari profile and digital security</p>
         </header>
 
-        {/* CUSTOM MODAL OVERLAY */}
+        {/* MODAL */}
         {showConfirm && (
           <div style={styles.modalOverlay}>
             <div style={styles.modal}>
               <h3 style={styles.modalTitle}>Remove Photo?</h3>
-              <p style={styles.modalText}>This will delete your current profile picture. You can upload a new one anytime.</p>
+              <p style={styles.modalText}>Your avatar will revert to initials.</p>
               <div style={styles.modalActions}>
-                <button style={styles.ghostBtn} onClick={() => setShowConfirm(false)}>Keep it</button>
-                <button style={styles.dangerBtnLarge} onClick={confirmRemovePhoto}>Yes, Remove</button>
+                <button style={styles.ghostBtn} onClick={() => setShowConfirm(false)}>Cancel</button>
+                <button style={styles.dangerBtnLarge} onClick={confirmRemovePhoto}>Remove Photo</button>
               </div>
             </div>
           </div>
         )}
 
-        {/* PROFILE IMAGE SECTION */}
+        {/* AVATAR SECTION */}
         <section style={styles.card}>
-          <div style={styles.cardHeader}>
-            <h3 style={styles.cardTitle}>Profile Picture</h3>
-            <p style={styles.helper}>Update or remove your photo to change your appearance</p>
-          </div>
-          
           <div style={styles.imageFlex}>
             <div style={styles.avatarWrapper}>
               <div style={styles.avatar}>
@@ -114,76 +112,82 @@ function ProfileSettings() {
                   <span>{profile.name?.[0]?.toUpperCase()}</span>
                 )}
               </div>
-              <div style={styles.cameraIcon} onClick={() => fileRef.current.click()}>📷</div>
+              <div style={styles.cameraIcon} onClick={() => fileRef.current.click()}>📸</div>
             </div>
-
-            <div style={styles.imageActions}>
-              {!imageEdit ? (
-                <div style={styles.actionRow}>
-                  <button style={styles.primaryBtn} onClick={() => fileRef.current.click()}>
-                    Change Photo
-                  </button>
-                  {savedImage && (
-                    <button style={styles.dangerBtn} onClick={() => setShowConfirm(true)}>
-                      Remove Photo
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div style={styles.actionRow}>
-                  <button style={styles.successBtn} onClick={saveImageChange}>
-                    Save New Photo
-                  </button>
-                  <button style={styles.ghostBtn} onClick={() => { setTempImage(savedImage); setImageEdit(false); }}>
-                    Cancel
-                  </button>
-                </div>
-              )}
+            <div>
+              <h3 style={styles.cardTitle}>Profile Avatar</h3>
+              <p style={styles.helper}>Visible to your fellow travelers</p>
+              <div style={styles.actionRow}>
+                {!imageEdit ? (
+                  <>
+                    <button style={styles.primaryBtn} onClick={() => fileRef.current.click()}>Upload</button>
+                    {savedImage && <button style={styles.dangerBtn} onClick={() => setShowConfirm(true)}>Remove</button>}
+                  </>
+                ) : (
+                  <>
+                    <button style={styles.primaryBtn} onClick={saveImageChange}>Save</button>
+                    <button style={styles.ghostBtn} onClick={() => { setTempImage(savedImage); setImageEdit(false); }}>Discard</button>
+                  </>
+                )}
+              </div>
               <input type="file" ref={fileRef} hidden accept="image/*" onChange={handleImageSelect} />
             </div>
           </div>
         </section>
 
-        {/* PERSONAL INFO SECTION */}
+        {/* IDENTITY SECTION */}
         <section style={styles.card}>
-          <div style={styles.cardHeader}><h3 style={styles.cardTitle}>Personal Information</h3></div>
+          <h3 style={styles.cardTitle}>Identity</h3>
           <div style={styles.row}>
             <div style={styles.rowLabel}>Full Name</div>
             <div style={styles.rowContent}>
-              {!editName ? <div style={styles.dataPoint}>{profile.name}</div> : 
-              <input style={styles.input} type="text" value={profile.name || ""} onChange={(e) => setProfile({ ...profile, name: e.target.value })} />}
+              {!editName ? (
+                <div style={styles.dataPoint}>{profile.name}</div>
+              ) : (
+                <input style={styles.input} value={profile.name || ""} onChange={(e) => setProfile({ ...profile, name: e.target.value })} />
+              )}
             </div>
-            <button style={styles.rowBtn} onClick={() => editName ? saveName() : setEditName(true)}>{editName ? "Save" : "Edit"}</button>
+            <button style={styles.rowBtn} onClick={() => editName ? saveName() : setEditName(true)}>
+              {editName ? "Save" : "Edit"}
+            </button>
           </div>
+
           <div style={styles.row}>
-            <div style={styles.rowLabel}>Email Address</div>
+            <div style={styles.rowLabel}>Email</div>
             <div style={styles.rowContent}>
-              {!editEmail ? <div style={styles.dataPoint}>{profile.email}</div> : 
-              <input style={styles.input} type="email" value={profile.email || ""} onChange={(e) => setProfile({ ...profile, email: e.target.value })} />}
+              {!editEmail ? (
+                <div style={styles.dataPoint}>{profile.email}</div>
+              ) : (
+                <input style={styles.input} value={profile.email || ""} onChange={(e) => setProfile({ ...profile, email: e.target.value })} />
+              )}
             </div>
-            <button style={styles.rowBtn} onClick={() => editEmail ? saveEmail() : setEditEmail(true)}>{editEmail ? "Save" : "Edit"}</button>
+            <button style={styles.rowBtn} onClick={() => editEmail ? saveEmail() : setEditEmail(true)}>
+              {editEmail ? "Save" : "Edit"}
+            </button>
           </div>
         </section>
 
         {/* SECURITY SECTION */}
         <section style={styles.card}>
-          <div style={styles.cardHeader}><h3 style={styles.cardTitle}>Security</h3></div>
+          <h3 style={styles.cardTitle}>Security</h3>
           {!showPasswordFields ? (
             <div style={styles.securityRow}>
               <div>
                 <div style={styles.dataPoint}>Password</div>
-                <div style={styles.helper}>Update your account security</div>
+                <div style={styles.helper}>Protected access</div>
               </div>
-              <button style={styles.secondaryBtn} onClick={() => setShowPasswordFields(true)}>Update Password</button>
+              <button style={styles.rowBtn} onClick={() => setShowPasswordFields(true)}>Change</button>
             </div>
           ) : (
             <div style={styles.passwordForm}>
-              <input style={styles.input} type="password" placeholder="Current Password" value={oldPwd} onChange={(e) => setOldPwd(e.target.value)} />
-              <input style={styles.input} type="password" placeholder="New Password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} />
-              <input style={styles.input} type="password" placeholder="Confirm New Password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} />
+              <input style={styles.inputFull} type="password" placeholder="Current password" value={oldPwd} onChange={(e) => setOldPwd(e.target.value)} />
               <div style={styles.actionRow}>
-                <button style={styles.primaryBtn} onClick={updatePassword}>Update Password</button>
-                <button style={styles.ghostBtn} onClick={() => { setShowPasswordFields(false); setOldPwd(""); setNewPwd(""); setConfirmPwd(""); }}>Cancel</button>
+                <input style={styles.inputHalf} type="password" placeholder="New password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} />
+                <input style={styles.inputHalf} type="password" placeholder="Confirm" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} />
+              </div>
+              <div style={styles.actionRow}>
+                <button style={styles.primaryBtn} onClick={updatePassword}>Save</button>
+                <button style={styles.ghostBtn} onClick={() => setShowPasswordFields(false)}>Cancel</button>
               </div>
             </div>
           )}
@@ -195,51 +199,51 @@ function ProfileSettings() {
   );
 }
 
-/* ================= UPDATED STYLES ================= */
-
 const styles = {
-  page: { minHeight: "100vh", background: "linear-gradient(180deg, #020617 0%, #0f172a 100%)", padding: "60px 20px", color: "#f8fafc", fontFamily: "'Inter', sans-serif" },
-  container: { maxWidth: "800px", margin: "0 auto" },
-  header: { marginBottom: "40px" },
-  pageTitle: { fontSize: "32px", fontWeight: "800", letterSpacing: "-1px", margin: "0 0 8px 0" },
-  pageSubtitle: { color: "#94a3b8", fontSize: "16px" },
-  
-  // Modal Styles
-  modalOverlay: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 },
-  modal: { background: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "24px", padding: "32px", maxWidth: "400px", textAlign: "center", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" },
-  modalTitle: { fontSize: "20px", fontWeight: "700", marginBottom: "12px", color: "#fff" },
-  modalText: { color: "#94a3b8", fontSize: "15px", lineHeight: "1.6", marginBottom: "24px" },
-  modalActions: { display: "flex", gap: "12px", justifyContent: "center" },
-
-  card: { background: "rgba(30, 41, 59, 0.4)", backdropFilter: "blur(12px)", borderRadius: "20px", border: "1px solid rgba(255, 255, 255, 0.08)", padding: "32px", marginBottom: "24px" },
-  cardHeader: { marginBottom: "24px" },
-  cardTitle: { fontSize: "18px", fontWeight: "700", margin: "0 0 4px 0" },
-  helper: { fontSize: "14px", color: "#64748b" },
-  imageFlex: { display: "flex", alignItems: "center", gap: "30px" },
+  page: { minHeight: "100vh", background: "var(--bg)", padding: "80px 20px", color: "var(--text-primary)", fontFamily: "'Inter', sans-serif" },
+  container: { maxWidth: "720px", margin: "0 auto" },
+  header: { marginBottom: "48px" },
+  pageTitle: { fontSize: "32px", fontWeight: "800", marginBottom: "8px" },
+  pageSubtitle: { color: "var(--text-secondary)", fontSize: "16px" },
+  card: { background: "var(--surface)", borderRadius: "24px", border: "1px solid var(--border)", padding: "32px", marginBottom: "24px" },
+  cardTitle: { fontSize: "18px", fontWeight: "700", marginBottom: "6px" },
+  helper: { fontSize: "14px", color: "var(--text-secondary)" },
+  imageFlex: { display: "flex", gap: "32px", alignItems: "center" },
   avatarWrapper: { position: "relative" },
-  avatar: { width: "100px", height: "100px", borderRadius: "32px", background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "40px", color: "#fff", overflow: "hidden" },
-  cameraIcon: { position: "absolute", bottom: "-5px", right: "-5px", background: "#1e293b", border: "2px solid #0f172a", width: "32px", height: "32px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", cursor: "pointer" },
+  avatar: { width: "120px", height: "120px", borderRadius: "36px", background: "var(--bg)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "44px", fontWeight: "800", color: "var(--primary)", overflow: "hidden" },
+  cameraIcon: { position: "absolute", bottom: "6px", right: "6px", width: "34px", height: "34px", borderRadius: "10px", background: "var(--primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" },
   img: { width: "100%", height: "100%", objectFit: "cover" },
-  imageActions: { flex: 1 },
-  actionRow: { display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" },
-  
-  primaryBtn: { background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)", color: "#fff", border: "none", borderRadius: "10px", padding: "10px 20px", fontWeight: "600", cursor: "pointer" },
-  successBtn: { background: "#10b981", color: "#fff", border: "none", borderRadius: "10px", padding: "10px 20px", fontWeight: "600", cursor: "pointer" },
-  dangerBtn: { background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "10px", padding: "10px 20px", fontWeight: "600", cursor: "pointer" },
-  dangerBtnLarge: { background: "#ef4444", color: "#fff", border: "none", borderRadius: "12px", padding: "12px 24px", fontWeight: "600", cursor: "pointer" },
-  secondaryBtn: { background: "rgba(255,255,255,0.05)", color: "#fff", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "10px 20px", fontWeight: "600", cursor: "pointer" },
-  ghostBtn: { background: "transparent", color: "#94a3b8", border: "none", padding: "10px 20px", cursor: "pointer", fontWeight: "600" },
-  
-  row: { display: "flex", alignItems: "center", padding: "20px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" },
-  rowLabel: { width: "150px", fontSize: "14px", color: "#94a3b8", fontWeight: "500" },
+  actionRow: { display: "flex", gap: "12px", marginTop: "16px", flexWrap: "wrap" },
+  primaryBtn: { background: "var(--primary)", color: "#fff", border: "none", borderRadius: "12px", padding: "12px 24px", fontWeight: "700", cursor: "pointer" },
+  dangerBtn: { background: "transparent", border: "1px solid #EF4444", color: "#EF4444", padding: "12px 24px", borderRadius: "12px", fontWeight: "600", cursor: "pointer" },
+  dangerBtnLarge: { background: "#EF4444", color: "#fff", border: "none", borderRadius: "14px", padding: "14px", fontWeight: "700", cursor: "pointer" },
+  ghostBtn: { background: "transparent", border: "none", color: "var(--text-secondary)", fontWeight: "600", cursor: "pointer" },
+  row: { display: "flex", alignItems: "center", padding: "20px 0", borderBottom: "1px solid var(--border)" },
+  rowLabel: { width: "160px", fontSize: "12px", color: "var(--text-secondary)", fontWeight: "600", textTransform: "uppercase" },
   rowContent: { flex: 1 },
-  dataPoint: { fontSize: "16px", fontWeight: "500", color: "#f1f5f9" },
-  rowBtn: { background: "transparent", border: "none", color: "#818cf8", fontWeight: "600", fontSize: "14px", cursor: "pointer", padding: "8px 16px" },
-  input: { background: "rgba(15, 23, 42, 0.6)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "10px 14px", color: "#fff", width: "100%", maxWidth: "300px", outline: "none" },
+  dataPoint: { fontSize: "16px", fontWeight: "500" },
+  rowBtn: { background: "transparent", border: "none", color: "var(--primary)", fontWeight: "700", cursor: "pointer", fontSize: "14px" },
+  input: {
+  background: "var(--bg)",
+  border: "1px solid var(--border)",
+  color: "var(--text-primary)",
+  borderRadius: "12px",
+  padding: "12px 16px",
+  width: "100%",
+  maxWidth: "320px",
+  outline: "none",
+},
+  inputFull: { background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-primary)", borderRadius: "12px", padding: "14px 16px", width: "100%", outline: "none" },
+  inputHalf: { background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-primary)", borderRadius: "12px", padding: "14px 16px", flex: 1, outline: "none" },
   securityRow: { display: "flex", justifyContent: "space-between", alignItems: "center" },
-  passwordForm: { display: "flex", flexDirection: "column", gap: "12px" },
-  error: { color: "#f87171", marginTop: "12px", fontSize: "14px" },
-  success: { color: "#4ade80", marginTop: "12px", fontSize: "14px" },
+  passwordForm: { display: "flex", flexDirection: "column", gap: "16px" },
+  error: { color: "#EF4444", marginTop: "16px", fontWeight: "600" },
+  success: { color: "var(--primary)", marginTop: "16px", fontWeight: "600" },
+  modalOverlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 },
+  modal: { background: "var(--surface)", borderRadius: "28px", border: "1px solid var(--border)", padding: "40px", maxWidth: "420px", textAlign: "center" },
+  modalTitle: { fontSize: "22px", fontWeight: "800", marginBottom: "12px" },
+  modalText: { color: "var(--text-secondary)", marginBottom: "32px" },
+  modalActions: { display: "flex", flexDirection: "column", gap: "12px" },
 };
 
 export default ProfileSettings;

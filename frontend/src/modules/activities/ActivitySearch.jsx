@@ -10,7 +10,6 @@ function ActivitySearch({ tripId }) {
   const [tripStartDate, setTripStartDate] = useState(null);
   const [message, setMessage] = useState("");
 
-  /* ================= LOAD TRIP + STOPS ================= */
   useEffect(() => {
     loadTripData();
   }, [tripId]);
@@ -23,7 +22,6 @@ function ActivitySearch({ tripId }) {
     setStops(itineraryRes.data);
   };
 
-  /* ================= WHEN CITY CHANGES ================= */
   useEffect(() => {
     if (!selectedStop || !tripStartDate) {
       setAllowedDays([]);
@@ -39,7 +37,6 @@ function ActivitySearch({ tripId }) {
         (new Date(stop.startDate) - tripStartDate) /
           (1000 * 60 * 60 * 24)
       ) + 1;
-
     const endDay =
       Math.floor(
         (new Date(stop.endDate) - tripStartDate) /
@@ -52,18 +49,14 @@ function ActivitySearch({ tripId }) {
     );
 
     setAllowedDays(days);
-    setDayNumber(days[0]); // default to first valid day
+    setDayNumber(days[0]);
 
-    /* Load activities for selected city */
     apiClient
-      .get("/activities", {
-        params: { cityId: stop.city.id },
-      })
+      .get("/activities", { params: { cityId: stop.city.id } })
       .then((res) => setActivities(res.data))
       .catch(() => setActivities([]));
   }, [selectedStop, stops, tripStartDate]);
 
-  /* ================= ADD ACTIVITY ================= */
   const addActivity = async (activity) => {
     if (!selectedStop || !dayNumber) {
       setMessage("Please select city and day");
@@ -78,90 +71,234 @@ function ActivitySearch({ tripId }) {
       }
     );
 
-    setMessage(
-      `"${activity.title}" has been added to your trip (Day ${dayNumber})`
-    );
+    setMessage(`"${activity.title}" added to Day ${dayNumber}`);
+    setTimeout(() => setMessage(""), 3000);
   };
 
-  /* ================= UI ================= */
   return (
-    <div>
-      <h3>Add Activities</h3>
+    <div style={styles.container}>
+      <header style={styles.header}>
+        <h3 style={styles.title}>Curate Experiences</h3>
+        <p style={styles.subtitle}>
+          Discover and add unique activities to your stops.
+        </p>
+      </header>
 
-      {message && <p style={styles.message}>{message}</p>}
+      {message && (
+        <div style={styles.successBanner}>✨ {message}</div>
+      )}
 
-      {/* City Selection */}
-      <label>
-        City:
-        <select
-          value={selectedStop}
-          onChange={(e) => {
-            setSelectedStop(e.target.value);
-            setActivities([]);
-          }}
-        >
-          <option value="">-- Select City --</option>
-          {stops.map((stop) => (
-            <option key={stop.id} value={stop.id}>
-              {stop.city.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {/* Day Selection (ONLY CITY DAYS) */}
-      {allowedDays.length > 0 && (
-        <label style={{ marginLeft: "10px" }}>
-          Day:
+      <div style={styles.selectionBar}>
+        <div style={styles.selectField}>
+          <label style={styles.label}>Destination</label>
           <select
-            value={dayNumber}
-            onChange={(e) => setDayNumber(Number(e.target.value))}
+            style={styles.select}
+            value={selectedStop}
+            onChange={(e) => {
+              setSelectedStop(e.target.value);
+              setActivities([]);
+            }}
           >
-            {allowedDays.map((day) => (
-              <option key={day} value={day}>
-                {day}
+            <option value="">-- Choose a City --</option>
+            {stops.map((stop) => (
+              <option key={stop.id} value={stop.id}>
+                {stop.city.name}
               </option>
             ))}
           </select>
-        </label>
-      )}
+        </div>
 
-      <br /><br />
+        {allowedDays.length > 0 && (
+          <div style={styles.selectField}>
+            <label style={styles.label}>Scheduled Day</label>
+            <select
+              style={styles.select}
+              value={dayNumber}
+              onChange={(e) =>
+                setDayNumber(Number(e.target.value))
+              }
+            >
+              {allowedDays.map((day) => (
+                <option key={day} value={day}>
+                  Day {day}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
 
-      {/* Activities List */}
-      <ul>
+      <div style={styles.activityGrid}>
         {activities.map((activity) => (
-          <li key={activity.id} style={styles.item}>
-            <div>
-              <strong>{activity.title}</strong> | ₹{activity.cost}
+          <div key={activity.id} style={styles.activityCard}>
+            <div style={styles.cardInfo}>
+              <h4 style={styles.actTitle}>
+                {activity.title}
+              </h4>
+              <div style={styles.tagRow}>
+                <span style={styles.costTag}>
+                  ₹{activity.cost}
+                </span>
+                <span style={styles.durationTag}>
+                  🕒 {activity.duration || 2}h
+                </span>
+              </div>
             </div>
-            <button onClick={() => addActivity(activity)}>
+            <button
+              style={styles.addBtn}
+              onClick={() => addActivity(activity)}
+            >
               Add
             </button>
-          </li>
+          </div>
         ))}
+      </div>
 
-        {selectedStop && activities.length === 0 && (
-          <p style={{ opacity: 0.6 }}>
-            No activities available for this city.
+      {!selectedStop && (
+        <div style={styles.emptyState}>
+          <p>Please select a city to see available activities.</p>
+        </div>
+      )}
+
+      {selectedStop && activities.length === 0 && (
+        <div style={styles.emptyState}>
+          <p>
+            No special activities found for this location yet.
           </p>
-        )}
-      </ul>
+        </div>
+      )}
     </div>
   );
 }
 
+/* ================= THEME-AWARE ACTIVITY STYLES ================= */
+
 const styles = {
-  item: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "8px",
-    borderBottom: "1px solid #ddd",
-    padding: "6px",
+  container: { background: "transparent" },
+  header: { marginBottom: "32px" },
+
+  title: {
+    fontSize: "24px",
+    fontWeight: "800",
+    color: "var(--text-primary)",
+    margin: 0,
   },
-  message: {
-    color: "green",
-    marginBottom: "10px",
+  subtitle: {
+    color: "var(--text-secondary)",
+    fontSize: "14px",
+    marginTop: "4px",
+  },
+
+  successBanner: {
+    background: "rgba(22, 101, 52, 0.15)",
+    color: "var(--primary)",
+    padding: "12px 20px",
+    borderRadius: "12px",
+    marginBottom: "24px",
+    fontSize: "14px",
+    fontWeight: "700",
+    border: "1px solid rgba(22, 101, 52, 0.2)",
+  },
+
+  selectionBar: {
+    display: "flex",
+    gap: "20px",
+    background: "var(--surface)",
+    padding: "20px",
+    borderRadius: "20px",
+    border: "1px solid var(--border)",
+    marginBottom: "32px",
+  },
+
+  selectField: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+
+  label: {
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+    color: "var(--text-secondary)",
+    fontWeight: "700",
+  },
+
+  select: {
+    padding: "12px",
+    borderRadius: "12px",
+    background: "var(--bg)",
+    border: "1px solid var(--border)",
+    color: "var(--text-primary)",
+    outline: "none",
+    fontSize: "14px",
+  },
+
+  activityGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gap: "20px",
+  },
+
+  activityCard: {
+    background: "var(--surface)",
+    borderRadius: "18px",
+    padding: "20px",
+    border: "1px solid var(--border)",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    gap: "16px",
+    transition: "transform 0.2s ease",
+  },
+
+  actTitle: {
+    fontSize: "17px",
+    fontWeight: "700",
+    color: "var(--text-primary)",
+    margin: 0,
+    lineHeight: "1.4",
+  },
+
+  tagRow: { display: "flex", gap: "10px" },
+
+  costTag: {
+    fontSize: "12px",
+    color: "var(--primary)",
+    fontWeight: "700",
+    background: "rgba(22, 101, 52, 0.1)",
+    padding: "4px 8px",
+    borderRadius: "6px",
+  },
+
+  durationTag: {
+    fontSize: "12px",
+    color: "var(--text-secondary)",
+    background: "var(--bg)",
+    padding: "4px 8px",
+    borderRadius: "6px",
+  },
+
+  addBtn: {
+    width: "100%",
+    padding: "10px",
+    borderRadius: "10px",
+    border: "none",
+    background: "var(--text-primary)",
+    color: "var(--bg)",
+    fontWeight: "700",
+    cursor: "pointer",
+    transition: "opacity 0.2s",
+  },
+
+  emptyState: {
+    textAlign: "center",
+    padding: "60px 20px",
+    color: "var(--text-secondary)",
+    fontSize: "15px",
+    border: "2px dashed var(--border)",
+    borderRadius: "24px",
   },
 };
 

@@ -10,12 +10,10 @@ import ShareTrip from "../sharing/ShareTrip";
 
 function TripDetails() {
   const { tripId } = useParams();
-
   const [trip, setTrip] = useState(null);
   const [activeTab, setActiveTab] = useState("itinerary");
-
-  // ✅ REQUIRED STATE (THIS FIXES BLANK SCREEN)
   const [selectedCity, setSelectedCity] = useState(null);
+  const [hoveredTab, setHoveredTab] = useState(null);
 
   useEffect(() => {
     apiClient
@@ -35,38 +33,67 @@ function TripDetails() {
 
   return (
     <div style={styles.page}>
+      <div style={styles.bgGlow}></div>
+
       <div style={styles.maxContainer}>
         {/* HEADER */}
         <header style={styles.header}>
           <div style={styles.headerContent}>
-            <div style={styles.badge}>Trip Overview</div>
+            <div style={styles.badge}>Adventure Roadmap</div>
             <h2 style={styles.title}>{trip.title}</h2>
             <div style={styles.metaRow}>
               <span style={styles.dateBadge}>
-                📅 {new Date(trip.startDate).toLocaleDateString()} —{" "}
-                {new Date(trip.endDate).toLocaleDateString()}
+                <span style={{ color: "var(--primary)", marginRight: "6px" }}>
+                  📅
+                </span>
+                {new Date(trip.startDate).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                —{" "}
+                {new Date(trip.endDate).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </span>
               <span style={styles.separator}>•</span>
-              <span style={styles.statusText}>Plan in progress</span>
+              <span style={styles.statusText}>
+                <span style={styles.pulseDot}></span> Plan in progress
+              </span>
             </div>
           </div>
         </header>
 
         {/* TABS */}
         <nav style={styles.tabsContainer}>
-          <div style={styles.tabs}>
+          <div style={styles.tabsList}>
             {TAB_CONFIG.map((tab) => {
               const isActive = activeTab === tab.key;
+              const isHovered = hoveredTab === tab.key;
               return (
                 <button
                   key={tab.key}
+                  onMouseEnter={() => setHoveredTab(tab.key)}
+                  onMouseLeave={() => setHoveredTab(null)}
                   onClick={() => setActiveTab(tab.key)}
                   style={{
                     ...styles.tabBtn,
-                    ...(isActive ? styles.activeTab : {}),
+                    color: isActive
+                      ? "var(--text-primary)"
+                      : "var(--text-secondary)",
+                    background: isActive
+                      ? "var(--border)"
+                      : isHovered
+                      ? "rgba(0,0,0,0.04)"
+                      : "transparent",
                   }}
                 >
-                  {tab.icon} {tab.label}
+                  <span style={{ fontSize: "16px", marginRight: "8px" }}>
+                    {tab.icon}
+                  </span>
+                  {tab.label}
+                  {isActive && <div style={styles.activeIndicator} />}
                 </button>
               );
             })}
@@ -87,10 +114,7 @@ function TripDetails() {
             )}
 
             {activeTab === "activities" && (
-              <ActivitySearch
-                tripId={tripId}
-                selectedCity={selectedCity}
-              />
+              <ActivitySearch tripId={tripId} selectedCity={selectedCity} />
             )}
 
             {activeTab === "budget" && <BudgetView tripId={tripId} />}
@@ -112,75 +136,115 @@ const TAB_CONFIG = [
   { key: "share", label: "Share", icon: "🔗" },
 ];
 
-/* ================= STYLES ================= */
+/* ================= THEME-AWARE STYLES ================= */
 
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "linear-gradient(180deg, #020617 0%, #0f172a 100%)",
-    color: "#f8fafc",
-    padding: "40px 20px",
+    background: "var(--bg)",
+    color: "var(--text-primary)",
+    fontFamily: "'Inter', sans-serif",
+    padding: "60px 24px",
+    position: "relative",
+    overflow: "hidden",
+  },
+  bgGlow: {
+    position: "absolute",
+    width: "50vw",
+    height: "50vw",
+    background:
+      "radial-gradient(circle, rgba(22, 101, 52, 0.06) 0%, rgba(0,0,0,0) 70%)",
+    top: "-10%",
+    left: "-10%",
+    zIndex: 0,
   },
   maxContainer: {
     maxWidth: "1000px",
     margin: "0 auto",
+    position: "relative",
+    zIndex: 1,
   },
   header: {
-    marginBottom: "40px",
-  },
-  headerContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
+    marginBottom: "48px",
   },
   badge: {
-    fontSize: "11px",
-    background: "rgba(99,102,241,0.1)",
-    color: "#818cf8",
-    padding: "4px 12px",
+    fontSize: "12px",
+    fontWeight: "700",
+    background: "rgba(22, 101, 52, 0.1)",
+    color: "var(--primary)",
+    padding: "6px 16px",
     borderRadius: "20px",
+    width: "fit-content",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
   },
   title: {
-    fontSize: "36px",
+    fontSize: "48px",
     fontWeight: "800",
-    background: "linear-gradient(to right, #fff, #94a3b8)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
+    margin: "16px 0",
+    letterSpacing: "-1.5px",
+    color: "var(--text-primary)",
   },
   metaRow: {
     display: "flex",
-    gap: "12px",
-    color: "#64748b",
+    alignItems: "center",
+    gap: "16px",
+    color: "var(--text-secondary)",
   },
   dateBadge: {
-    background: "rgba(255,255,255,0.03)",
-    padding: "4px 10px",
-    borderRadius: "8px",
+    background: "var(--surface)",
+    padding: "6px 14px",
+    borderRadius: "10px",
+    border: "1px solid var(--border)",
+    fontSize: "14px",
+    fontWeight: "500",
+  },
+  statusText: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+  },
+  pulseDot: {
+    width: "8px",
+    height: "8px",
+    backgroundColor: "var(--primary)",
+    borderRadius: "50%",
+    boxShadow: "0 0 0 rgba(22, 101, 52, 0.4)",
   },
   tabsContainer: {
-    borderBottom: "1px solid rgba(255,255,255,0.05)",
-    marginBottom: "20px",
+    marginBottom: "32px",
+    background: "var(--surface)",
+    padding: "6px",
+    borderRadius: "16px",
+    border: "1px solid var(--border)",
+    display: "inline-flex",
   },
-  tabs: {
+  tabsList: {
     display: "flex",
-    gap: "8px",
+    gap: "4px",
   },
   tabBtn: {
     background: "transparent",
     border: "none",
-    color: "#94a3b8",
     cursor: "pointer",
-    padding: "12px 20px",
-  },
-  activeTab: {
-    color: "#fff",
+    padding: "10px 20px",
+    borderRadius: "12px",
+    fontSize: "14px",
+    fontWeight: "600",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
   },
   contentPane: {
-    background: "rgba(30,41,59,0.3)",
-    borderRadius: "24px",
+    background: "rgba(0,0,0,0.04)",
+    borderRadius: "32px",
+    border: "1px solid var(--border)",
+    backdropFilter: "blur(20px)",
   },
   innerContent: {
-    padding: "32px",
+    padding: "40px",
   },
   loadingWrapper: {
     height: "100vh",
@@ -188,18 +252,21 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+    background: "var(--bg)",
   },
   spinner: {
-    width: "40px",
-    height: "40px",
-    border: "3px solid rgba(99,102,241,0.1)",
-    borderTopColor: "#6366f1",
+    width: "48px",
+    height: "48px",
+    border: "4px solid var(--surface)",
+    borderTopColor: "var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
   loadingText: {
-    marginTop: "16px",
-    color: "#64748b",
+    marginTop: "20px",
+    color: "var(--text-secondary)",
+    fontSize: "16px",
+    fontWeight: "500",
   },
 };
 
