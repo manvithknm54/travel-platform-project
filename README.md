@@ -1,119 +1,112 @@
-🌍 Safarify — A Trip Note & Travel Planning App
+Got it — thanks for your patience.
+I understand the problem now: you want a **GitHub-profile–friendly README** that renders **cleanly, aligned, readable, and professional**, without awkward spacing or layout issues.
 
-Safarify is a modern trip note and travel planning web application that helps users plan, organize, and track their trips efficiently.
-It focuses on providing a clean user experience, structured trip management, and seamless interaction through an intuitive dashboard with light and dark themes.
+Below is a **carefully normalized Markdown README** that I *personally optimized for GitHub rendering*.
+No broken blocks, no weird indentation, no over-styling.
 
-Safarify is designed as a real-world, product-style project, showcasing frontend UI/UX excellence, backend logic, and database design.
+👉 **This is the one you should copy-paste directly into `README.md`**.
 
-✨ Key Highlights
+---
 
-User-centric UI/UX with light & dark mode
+# Safarify — A Trip Note & Travel Planning App
 
-Structured trip planning and tracking
+Safarify is a modern **trip note and travel planning web application** that helps users plan, organize, and track their trips efficiently.
+The platform focuses on **clean UI/UX**, structured trip management, and an intuitive dashboard experience with **light and dark mode support**.
 
-Clean dashboard experience
+This project is built as a **real-world, portfolio-ready full-stack application**, demonstrating frontend design, backend development, and database integration.
 
-Scalable frontend and backend architecture
+---
 
-Resume-ready, real-world project design
+## Key Highlights
 
-🚀 Core Features
-🧳 Trip Management
+* Clean and user-friendly interface
+* Light & Dark theme support
+* Structured trip planning workflow
+* Scalable frontend and backend architecture
+* Resume-ready real-world project
 
-Create and manage trips
+---
 
-View recent and ongoing trips
+## Features
 
-Detailed trip overview with itinerary
+### Trip Management
 
-Public itinerary view & trip sharing
+* Create and manage trips
+* View recent and ongoing trips
+* Detailed trip view with itinerary
+* Public itinerary and trip sharing
 
-🗺️ Planning & Discovery
+### Planning & Discovery
 
-City search functionality
+* City search
+* Activity search
+* Budget planning view
+* Proper activity duration handling
 
-Activity search and selection
+### User Profile & Settings
 
-Budget view for trip planning
+* User profile dashboard
+* Profile image upload
+* Edit personal details
+* Profile settings management
 
-Activity duration handling with proper validation
+### UI / UX
 
-👤 User Profile & Settings
+* Fully responsive design
+* Light and Dark mode toggle
+* Clean navigation flow
+* Password visibility toggle
+* Custom branding with logo and images
 
-User profile dashboard
+### Backend & Database
 
-Profile image upload
+* RESTful API design
+* Service-based backend architecture
+* Prisma ORM integration
+* Database seeding support
 
-Editable personal details
+---
 
-Profile settings management
+## Tech Stack
 
-🎨 UI / UX Experience
+### Frontend
 
-Fully responsive layout
+* React (Vite)
+* JavaScript (ES6+)
+* HTML5
+* CSS3
+* Context API
 
-Light & Dark mode toggle
+### Backend
 
-Clean navigation with intuitive flow
+* Node.js
+* Express.js
+* Prisma ORM
 
-Password visibility toggle (eye icon)
+### Database
 
-Branding with custom logo and visuals
+* PostgreSQL
 
-⚙️ Backend & Database
+---
 
-Well-structured API routes
+## Project Structure
 
-Service-based backend architecture
-
-Prisma ORM with schema design
-
-Database seeding support
-
-Optimized activity and city workflows
-
-🛠 Tech Stack
-Frontend
-
-React (Vite)
-
-JavaScript (ES6+)
-
-HTML5
-
-CSS3 (Global styling)
-
-Context API (Theme & User state)
-
-Backend
-
-Node.js
-
-Express.js
-
-Prisma ORM
-
-Database
-
-PostgreSQL
-
-📂 Project Folder Structure
-Project_0.1/
-│
-├── frontend/
+```
+Project_0.1
+├── frontend
 │   ├── index.html
-│   ├── src/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   │   ├── Navbar.jsx
-│   │   ├── context/
+│   ├── src
+│   │   ├── assets
+│   │   ├── components
+│   │   │   └── Navbar.jsx
+│   │   ├── context
 │   │   │   ├── ThemeContext.jsx
-│   │   │   ├── UserContext.jsx
-│   │   ├── modules/
-│   │   │   ├── auth/
+│   │   │   └── UserContext.jsx
+│   │   ├── modules
+│   │   │   ├── auth
 │   │   │   │   ├── Login.jsx
-│   │   │   │   ├── Signup.jsx
-│   │   │   ├── trips/
+│   │   │   │   └── Signup.jsx
+│   │   │   ├── trips
 │   │   │   │   ├── TripList.jsx
 │   │   │   │   ├── TripDetails.jsx
 │   │   │   │   ├── CreateTrip.jsx
@@ -122,116 +115,118 @@ Project_0.1/
 │   │   │   │   ├── ShareTrip.jsx
 │   │   │   │   ├── CitySearch.jsx
 │   │   │   │   ├── ActivitySearch.jsx
-│   │   │   │   ├── BudgetView.jsx
-│   │   │   ├── profile/
-│   │   │   │   ├── ProfileSettings.jsx
-│   │   ├── styles/
-│   │   │   ├── global.css
-│   │   ├── main.jsx
+│   │   │   │   └── BudgetView.jsx
+│   │   │   └── profile
+│   │   │       └── ProfileSettings.jsx
+│   │   ├── styles
+│   │   │   └── global.css
+│   │   └── main.jsx
 │
-├── backend/
-│   ├── prisma/
+├── backend
+│   ├── prisma
 │   │   ├── schema.prisma
-│   │   ├── migrations/
-│   │   ├── seed.js
-│   ├── routes/
+│   │   ├── migrations
+│   │   └── seed.js
+│   ├── routes
 │   │   ├── activity.routes.js
-│   │   ├── city.routes.js
-│   ├── services/
+│   │   └── city.routes.js
+│   ├── services
 │   │   ├── activity.service.js
-│   │   ├── city.service.js
-│   ├── api/
-│   │   ├── activities.api.js
+│   │   └── city.service.js
+│   └── api
+│       └── activities.api.js
 │
 ├── README.md
 └── .gitignore
+```
 
-⚙️ Installation & Setup
-1️⃣ Clone the repository
+---
+
+## Installation & Setup
+
+### Clone the Repository
+
+```bash
 git clone https://github.com/manvithknm54/travel-platform-project.git
+```
 
-2️⃣ Frontend Setup
+### Frontend Setup
+
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-3️⃣ Backend Setup
+### Backend Setup
+
+```bash
 cd backend
 npm install
 npx prisma generate
 npx prisma migrate dev
 npm start
+```
 
-🧩 Development Phases
-🔹 Phase 1 — Foundation
+---
 
-Project setup
+## Development Phases
 
-Basic routing and UI structure
+### Phase 1 — Foundation
 
-Initial trip modules
+* Project setup
+* Base UI and routing
+* Initial trip modules
 
-🔹 Phase 2 — Core Features
+### Phase 2 — Core Features
 
-Trip dashboards (recent & ongoing)
+* Trip dashboards
+* Trip creation workflow
+* Profile management
+* UI bug fixes
 
-Trip creation workflow
+### Phase 3 — Backend & Database
 
-Profile management & image upload
+* Prisma schema enhancements
+* API and service optimization
+* Activity and city workflows
+* Database seeding
 
-Bug fixes and UX refinements
+### Phase 4 — UI/UX & Theming
 
-🔹 Phase 3 — Backend & Database
+* Light and Dark mode implementation
+* Global UI/UX improvements
+* Better navigation and accessibility
+* Branding with logo and visuals
 
-Prisma schema improvements
+---
 
-API and service layer optimization
+## Future Enhancements
 
-Activity & city workflows
+* Authentication and authorization
+* Payment integration
+* Analytics dashboard
+* Notifications and reminders
+* Mobile-first optimization
+* Cloud deployment
 
-Database seeding
+---
 
-🔹 Phase 4 — UI/UX & Theming
+## Developer
 
-Light & Dark mode implementation
+**Project Name:** Safarify
+**Type:** Trip Note & Travel Planning Web Application
 
-Global UI/UX overhaul
+Built as a **portfolio project** to demonstrate full-stack development, clean UI/UX design, and professional Git workflow.
 
-Improved navigation & accessibility
+---
 
-Branding with logo and visuals
+## Why Safarify?
 
-📌 Future Enhancements
+Safarify demonstrates:
 
-Authentication & authorization (JWT)
-
-Payment integration
-
-Trip analytics dashboard
-
-Notifications & reminders
-
-Mobile-first optimization
-
-Cloud deployment
-
-👨‍💻 Developer
-
-Project Name: Safarify
-Type: Trip Note & Travel Planning Web App
-
-This project was built as a portfolio and learning project, focusing on real-world development practices, clean architecture, and user-focused design.
-
-⭐ Why Safarify?
-
-Safarify is not just a UI project — it demonstrates:
-
-Product thinking
-
-Full-stack development skills
-
-Database & backend knowledge
-
-Professional Git workflow
-
-Scalable and maintainable design
+* Product-oriented thinking
+* Full-stack development capability
+* Backend and database understanding
+* Clean and scalable architecture
+* Interview-ready project quality
